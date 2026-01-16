@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Donate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body{font-family:sans-serif;text-align:center;padding:40px}
+    button{padding:15px 25px;font-size:18px;cursor:pointer}
+  </style>
+</head>
+<body>
+
+<h1>Donate £5</h1>
+<button id="donate">Donate</button>
+
+<script>
+const stripe = Stripe("pk_test_51SSCktCoWx432Ea8Wqso4IeICvQ2ZWSFdunUXHg2ENj0hNdc9KSOvYTpy7NwziPqQ2YUWWWXLQHSzcvNeN9AK8Fe00X5L68Dp7");
+
+document.getElementById("donate").onclick = async () => {
+  const res = await fetch("https://europe-west2-donate-app-ff07c.cloudfunctions.net/createCheckout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      amount: 500,
+      currency: "gbp"
+    })
+  });
+
+  const data = await res.json();
+  window.location = data.url;
+};
+</script>
+
+</body>
+</html>
