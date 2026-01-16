@@ -1,1 +1,98 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login</title><style>body{font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px}h1{margin:10px 0 18px}input,button{width:100%;padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,.15);font-size:16px;box-sizing:border-box}button{border:0;cursor:pointer;margin-top:10px}#msg{margin-top:12px;padding:12px 14px;border-radius:12px;border:1px solid rgba(0,0,0,.12);display:none}small{opacity:.7}a{cursor:pointer}</style></head><body><h1>Sign in</h1><small>Email + password</small><div style="height:14px"></div><input id="email" type="email" placeholder="Email"><div style="height:10px"></div><input id="pass" type="password" placeholder="Password"><button id="login">Login</button><button id="signup" style="background:#111;color:#fff">Create account</button><button id="reset" style="background:#eee">Forgot password</button><div id="msg"></div><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";import{getAuth,setPersistence,browserLocalPersistence,createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";import{getFirestore,doc,getDoc,setDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";const firebaseConfig={apiKey:"PASTE_API_KEY",authDomain:"PASTE_AUTH_DOMAIN",projectId:"PASTE_PROJECT_ID",storageBucket:"PASTE_STORAGE_BUCKET",messagingSenderId:"PASTE_SENDER_ID",appId:"PASTE_APP_ID"};const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);const $=id=>document.getElementById(id),show=(t,ok=1)=>{const m=$("msg");m.style.display="block";m.textContent=t;m.style.borderColor=ok?"rgba(0,0,0,.12)":"rgba(255,0,0,.35)"};await setPersistence(auth,browserLocalPersistence);onAuthStateChanged(auth,async u=>{if(!u)return;location.href="app.html"});const getVals=()=>({email:$("email").value.trim(),pass:$("pass").value});$("login").onclick=async()=>{try{const{email,pass}=getVals();if(!email||!pass)return show("Enter email + password",0);await signInWithEmailAndPassword(auth,email,pass);location.href="app.html"}catch(e){show(e.message||String(e),0)}};$("signup").onclick=async()=>{try{const{email,pass}=getVals();if(!email||!pass)return show("Enter email + password",0);const cred=await createUserWithEmailAndPassword(auth,email,pass);const u=cred.user;const ref=doc(db,"users",u.uid);const snap=await getDoc(ref);if(!snap.exists())await setDoc(ref,{email:u.email||"",unlocked:false,createdAt:serverTimestamp()},{merge:true});show("Account created. Redirecting…");setTimeout(()=>location.href="app.html",500)}catch(e){show(e.message||String(e),0)}};$("reset").onclick=async()=>{try{const email=$("email").value.trim();if(!email)return show("Enter your email first",0);await sendPasswordResetEmail(auth,email);show("Password reset email sent.");}catch(e){show(e.message||String(e),0)}};</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<style>
+body{font-family:sans-serif;background:#f5f5f5;margin:0;padding:0}
+.container{max-width:400px;margin:60px auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.1)}
+h1{text-align:center}
+input,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #ccc;font-size:16px}
+button{background:#000;color:#fff;border:none;cursor:pointer}
+button.secondary{background:#eee;color:#000}
+.error{color:#c00;margin-top:10px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Sign in</h1>
+
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+<button class="secondary" onclick="register()">Create account</button>
+<button class="secondary" onclick="resetPassword()">Forgot password</button>
+
+<div id="error" class="error"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",
+  authDomain: "donate-app-ff07c.firebaseapp.com",
+  projectId: "donate-app-ff07c",
+  storageBucket: "donate-app-ff07c.firebasestorage.app",
+  messagingSenderId: "950201336557",
+  appId: "1:950201336557:web:e8bdfa02d99512051f82e4"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const errorBox = document.getElementById("error");
+
+window.login = async () => {
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+    window.location.href = "dashboard.html";
+  } catch (e) {
+    errorBox.textContent = e.message;
+  }
+};
+
+window.register = async () => {
+  try {
+    await createUserWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+    window.location.href = "dashboard.html";
+  } catch (e) {
+    errorBox.textContent = e.message;
+  }
+};
+
+window.resetPassword = async () => {
+  try {
+    await sendPasswordResetEmail(auth, email.value);
+    alert("Password reset email sent");
+  } catch (e) {
+    errorBox.textContent = e.message;
+  }
+};
+
+// Auto-login if already signed in
+onAuthStateChanged(auth, user => {
+  if (user) window.location.href = "dashboard.html";
+});
+</script>
+
+</body>
+</html>
