@@ -1,17 +1,1 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Thank you</title>
-</head>
-<body style="font-family:sans-serif;text-align:center;margin-top:50px;">
-  <h1>✅ Donation successful</h1>
-  <p>Thank you for your support.</p>
-
-  <p>You can now return to the site.</p>
-
-  <a href="https://ventsharm.github.io/donate-site/">
-    Back to site
-  </a>
-</body>
-</html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Success</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#fff}main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}div{max-width:520px;text-align:center}h1{font-size:30px;margin:0 0 10px}p{color:#444;margin:0 0 14px}a{color:#111}</style></head><body><main><div><h1>✅ Payment received</h1><p>Unlocking your account…</p><p id="s"></p><p><a href="login.html">Back to login</a></p></div></main><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};const app=initializeApp(firebaseConfig);const auth=getAuth(app);const db=getFirestore(app);const s=document.getElementById("s");const sleep=ms=>new Promise(r=>setTimeout(r,ms));async function isPaid(uid){const snap=await getDoc(doc(db,`users/${uid}/entitlements/access`));return snap.exists()&&snap.data()&&snap.data().paid===true}onAuthStateChanged(auth,async u=>{if(!u){s.textContent="You’re not logged in. Please login first.";return}for(let i=0;i<12;i++){const ok=await isPaid(u.uid).catch(()=>false);if(ok){location.href="app.html";return}s.textContent="Waiting for confirmation… ("+(i+1)+"/12)";await sleep(1500)}s.textContent="Still not confirmed. Go back to login and tap Pay again if needed."});</script></body></html>
