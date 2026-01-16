@@ -1,1 +1,109 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>App</title><style>body{font-family:sans-serif;max-width:720px;margin:0 auto;padding:24px}button{padding:14px 16px;border-radius:12px;border:0;cursor:pointer;font-size:16px}#card{margin-top:14px;padding:14px 16px;border:1px solid rgba(0,0,0,.12);border-radius:14px}a{cursor:pointer}</style></head><body><h1>Your account</h1><div id="card">Checking access…</div><div style="height:12px"></div><button id="logout" style="background:#eee">Logout</button><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";const firebaseConfig={apiKey:"PASTE_API_KEY",authDomain:"PASTE_AUTH_DOMAIN",projectId:"PASTE_PROJECT_ID",storageBucket:"PASTE_STORAGE_BUCKET",messagingSenderId:"PASTE_SENDER_ID",appId:"PASTE_APP_ID"};const DONATE_PAGE="https://ventsharm.github.io/donate-site/";const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);const card=document.getElementById("card");document.getElementById("logout").onclick=async()=>{await signOut(auth);location.href="login.html"};onAuthStateChanged(auth,async u=>{if(!u){location.href="login.html";return;}try{const snap=await getDoc(doc(db,"users",u.uid));const data=snap.exists()?snap.data():{};const unlocked=!!data.unlocked;if(unlocked){card.innerHTML=`✅ Unlocked<br><small>${u.email||""}</small><div style="height:10px"></div><a href="payments.html">Go to payments</a>`;}else{card.innerHTML=`🔒 Not unlocked yet<br><small>${u.email||""}</small><div style="height:10px"></div><button id="go" style="background:#111;color:#fff;width:100%">Pay £5 to unlock</button>`;document.getElementById("go").onclick=()=>{location.href=DONATE_PAGE};}}catch(e){card.textContent="Error: "+(e.message||String(e));}});</script></body></html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Your Account</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:sans-serif;max-width:720px;margin:0 auto;padding:24px}
+    h1{margin-bottom:10px}
+    #card{margin-top:14px;padding:16px;border:1px solid rgba(0,0,0,.12);border-radius:14px}
+    button{padding:14px 16px;border-radius:12px;border:0;cursor:pointer;font-size:16px}
+    .primary{background:#111;color:#fff;width:100%}
+    .muted{background:#eee}
+    small{opacity:.7}
+  </style>
+</head>
+<body>
+
+<h1>Your account</h1>
+<div id="card">Checking access…</div>
+<div style="height:12px"></div>
+<button id="logout" class="muted">Logout</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* 🔴 PASTE YOUR FIREBASE CONFIG HERE 🔴 */
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_AUTH_DOMAIN",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_STORAGE_BUCKET",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID"
+};
+/* 🔴 END CONFIG 🔴 */
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const card = document.getElementById("card");
+const logoutBtn = document.getElementById("logout");
+
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  location.href = "login.html";
+};
+
+onAuthStateChanged(auth, async (u) => {
+  if (!u) {
+    location.href = "login.html";
+    return;
+  }
+
+  try {
+    const snap = await getDoc(doc(db, "users", u.uid));
+    const data = snap.exists() ? snap.data() : {};
+    const unlocked = !!data.unlocked;
+
+    if (unlocked) {
+      card.innerHTML = `
+        ✅ <strong>Unlocked</strong><br>
+        <small>${u.email || ""}</small><br><br>
+        You have full access.
+      `;
+    } else {
+      card.innerHTML = `
+        🔒 <strong>Locked</strong><br>
+        <small>${u.email || ""}</small><br><br>
+        <button id="go" class="primary">Pay £5 to unlock</button>
+      `;
+
+      document.getElementById("go").onclick = async () => {
+        try {
+          const token = await u.getIdToken();
+          const res = await fetch(
+            "https://createcheckout-ywfufoyxmq-nw.a.run.app",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+              },
+              body: "{}"
+            }
+          );
+
+          const data = await res.json();
+          if (!res.ok || !data.url) {
+            alert(data.error || "Checkout error");
+          } else {
+            location.href = data.url;
+          }
+        } catch (e) {
+          alert("Error: " + (e.message || e));
+        }
+      };
+    }
+  } catch (e) {
+    card.textContent = "Error: " + (e.message || e);
+  }
+});
+</script>
+
+</body>
+</html>
