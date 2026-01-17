@@ -1,1 +1,97 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#f6f6f6}main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.card{width:100%;max-width:420px;background:#fff;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.08);padding:22px}h1{margin:0 0 14px;font-size:40px;letter-spacing:-.5px}label{display:block;font-size:14px;margin:10px 0 6px;color:#222}input{width:100%;padding:14px 14px;border:1px solid #d8d8d8;border-radius:12px;font-size:16px;outline:none}input:focus{border-color:#111}button{width:100%;padding:14px 16px;border:0;border-radius:12px;font-size:18px;cursor:pointer;margin-top:12px}button.primary{background:#111;color:#fff}button.secondary{background:#eee;color:#111}button.pay{background:#10b981;color:#fff}small{display:block;color:#666;margin-top:10px}#msg{margin-top:14px;padding:12px;border-radius:12px;background:#fff0f0;color:#b00020;border:1px solid #ffd0d0;display:none}#ok{margin-top:14px;padding:12px;border-radius:12px;background:#ecfdf5;color:#065f46;border:1px solid #bbf7d0;display:none}#payBox{display:none;margin-top:16px;padding:14px;border-radius:14px;background:#f8fafc;border:1px solid #e5e7eb}#payBox p{margin:0 0 10px;color:#111}</style></head><body><main><div class="card"><h1>Sign in</h1><div id="ok"></div><div id="msg"></div><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="you@email.com"><label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="••••••••"><button class="primary" id="loginBtn">Login</button><button class="secondary" id="signupBtn">Create account</button><button class="secondary" id="resetBtn">Forgot password</button><div id="payBox"><p><b>Payment required.</b><br>Pay once to unlock the app.</p><button class="pay" id="payBtn">Pay £5</button><small>After payment you’ll be redirected back and unlocked.</small></div><small id="status"></small></div></main><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};const app=initializeApp(firebaseConfig);const auth=getAuth(app);const db=getFirestore(app);const CREATE_CHECKOUT_URL="https://createcheckout-ywfufoyxmq-nw.a.run.app";const $=id=>document.getElementById(id);const show=(el,txt)=>{el.style.display="block";el.textContent=txt};const hide=el=>{el.style.display="none";el.textContent=""};const setStatus=t=>{$("status").textContent=t||""};const emailLower=s=>(s||"").trim().toLowerCase();async function isPaid(uid){const snap=await getDoc(doc(db,`users/${uid}/entitlements/access`));return snap.exists()&&snap.data()&&snap.data().paid===true}async function afterAuth(user){hide($("msg"));hide($("ok"));$("payBox").style.display="none";if(!user){setStatus("Not signed in.");return}setStatus("Checking access…");const paid=await isPaid(user.uid).catch(()=>false);if(paid){show($("ok"),"✅ Access active. Redirecting…");setStatus("");location.href="app.html"}else{show($("msg"),"You’re logged in, but you haven’t paid yet.");$("payBox").style.display="block";setStatus("Pay once to unlock.")}}onAuthStateChanged(auth,u=>{afterAuth(u)});$("loginBtn").onclick=async()=>{hide($("msg"));hide($("ok"));try{const e=emailLower($("email").value),p=$("pass").value;if(!e||!p)return show($("msg"),"Enter email and password.");await signInWithEmailAndPassword(auth,e,p);show($("ok"),"Logged in.");}catch(err){show($("msg"),err.message||String(err))}};$("signupBtn").onclick=async()=>{hide($("msg"));hide($("ok"));try{const e=emailLower($("email").value),p=$("pass").value;if(!e||!p)return show($("msg"),"Enter email and password.");await createUserWithEmailAndPassword(auth,e,p);show($("ok"),"Account created. Checking access…");}catch(err){show($("msg"),err.message||String(err))}};$("resetBtn").onclick=async()=>{hide($("msg"));hide($("ok"));try{const e=emailLower($("email").value);if(!e)return show($("msg"),"Enter your email first.");await sendPasswordResetEmail(auth,e);show($("ok"),"Password reset email sent.");}catch(err){show($("msg"),err.message||String(err))}};$("payBtn").onclick=async()=>{hide($("msg"));hide($("ok"));const user=auth.currentUser;if(!user)return show($("msg"),"Please login first.");try{setStatus("Creating checkout…");const token=await user.getIdToken(true);const r=await fetch(CREATE_CHECKOUT_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({})});const j=await r.json();if(!r.ok)throw new Error(j&&j.error?j.error:"Checkout failed");if(!j.url)throw new Error("No checkout URL returned");location.href=j.url}catch(err){show($("msg"),err.message||String(err));setStatus("")}};</script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Login</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center}#card{width:min(520px,92vw);border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:26px 18px}h1{font-size:56px;margin:0 0 12px}label{display:block;margin:14px 0 6px;color:#111}input{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.12);border-radius:14px;padding:14px 14px;font-size:16px;background:#eef4ff;outline:none}button{width:100%;border:0;border-radius:14px;padding:14px 14px;font-size:18px;margin-top:12px;cursor:pointer}#loginBtn{background:linear-gradient(180deg,#111,#000);color:#fff}#createBtn,#forgotBtn{background:#eee;color:#111}#msg{background:#e8fff0;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px 14px;margin:10px 0 14px;color:#0a6}#err{background:#ffe8e8;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px 14px;margin:10px 0 14px;color:#b00;display:none}#payWrap{margin-top:18px;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:14px}#payBtn{background:#16b879;color:#fff;font-weight:700}#small{color:#666;margin-top:8px;font-size:14px}</style></head><body><div id="card"><h1>Sign in</h1><div id="msg">Not logged in.</div><div id="err"></div><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="you@email.com"/><label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="••••••••"/><button id="loginBtn">Login</button><button id="createBtn">Create account</button><button id="forgotBtn">Forgot password</button><div id="payWrap"><b>Payment required.</b><div>Pay once to unlock the app.</div><button id="payBtn">Pay £5</button><div id="small">After payment you’ll be redirected back and unlocked.</div><div id="small" style="margin-top:6px;opacity:.9" id="unlockNote"></div></div></div><script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+import{getAuth,setPersistence,browserLocalPersistence,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};
+const CREATE_CHECKOUT_URL="https://createcheckout-ywfufoyxmq-nw.a.run.app";
+
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const msg=$("msg"),err=$("err"),unlockNote=$("unlockNote");
+const showErr=t=>{err.style.display="block";err.textContent=t||"Error";};
+const clearErr=()=>{err.style.display="none";err.textContent="";};
+const sleep=t=>new Promise(r=>setTimeout(r,t));
+
+await setPersistence(auth,browserLocalPersistence);
+
+async function isPaid(uid){
+  const snap=await getDoc(doc(db,"users",uid));
+  return snap.exists()&&snap.data()?.paid===true;
+}
+
+async function unlockFlowIfNeeded(user){
+  // If we just came back from Stripe success, force a paid-check loop.
+  const url=new URL(location.href);
+  const sid=url.searchParams.get("session_id")||localStorage.getItem("pending_session_id");
+  if(!sid)return; // nothing pending
+
+  // keep it for a bit while checking
+  localStorage.setItem("pending_session_id",sid);
+  unlockNote.textContent="Checking unlock…";
+
+  for(let i=1;i<=14;i++){
+    try{
+      const paid=await isPaid(user.uid);
+      if(paid){
+        localStorage.removeItem("pending_session_id");
+        unlockNote.textContent="Unlocked! Redirecting…";
+        location.replace("app.html");
+        return;
+      }
+    }catch(e){}
+    unlockNote.textContent=`Waiting for confirmation… (${i}/14)`;
+    await sleep(1200);
+  }
+  unlockNote.textContent="Still not confirmed. If needed, tap Pay again (it should re-use the same login).";
+}
+
+$("loginBtn").onclick=async()=>{
+  clearErr();
+  const email=$("email").value.trim(),pass=$("pass").value;
+  if(!email||!pass){showErr("Enter email + password.");return;}
+  try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){showErr(e?.message||"Login failed");}
+};
+
+$("createBtn").onclick=async()=>{
+  clearErr();
+  const email=$("email").value.trim(),pass=$("pass").value;
+  if(!email||!pass){showErr("Enter email + password.");return;}
+  try{await createUserWithEmailAndPassword(auth,email,pass);}catch(e){showErr(e?.message||"Create failed");}
+};
+
+$("forgotBtn").onclick=async()=>{
+  clearErr();
+  const email=$("email").value.trim();
+  if(!email){showErr("Enter your email first.");return;}
+  try{await sendPasswordResetEmail(auth,email);msg.textContent="Password reset email sent."; }catch(e){showErr(e?.message||"Reset failed");}
+};
+
+$("payBtn").onclick=async()=>{
+  clearErr();
+  const u=auth.currentUser;
+  if(!u){showErr("Please login first, then tap Pay.");return;}
+  try{
+    // mark pending so if auth drops on return, we can force user back through login and unlock
+    localStorage.setItem("pending_payment","1");
+    const idToken=await u.getIdToken();
+    const res=await fetch(CREATE_CHECKOUT_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},body:JSON.stringify({})});
+    if(!res.ok){const t=await res.text().catch(()=> "");throw new Error("Checkout failed: "+res.status+" "+t);}
+    const data=await res.json();
+    if(!data.url)throw new Error("No checkout url returned");
+    location.href=data.url;
+  }catch(e){showErr(e?.message||"Failed to start checkout");}
+};
+
+onAuthStateChanged(auth,async(u)=>{
+  clearErr();
+  if(!u){msg.textContent="Not logged in.";return;}
+  msg.textContent="Logged in.";
+  try{
+    // First: if already paid, go straight in
+    if(await isPaid(u.uid)){location.replace("app.html");return;}
+  }catch(e){}
+  // Second: if we returned from Stripe or have a pending session, run unlock loop
+  await unlockFlowIfNeeded(u);
+});
+</script></body></html>
