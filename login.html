@@ -3,135 +3,109 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",
-  authDomain: "donate-app-ff07c.firebaseapp.com",
-  projectId: "donate-app-ff07c",
-  storageBucket: "donate-app-ff07c.firebasestorage.app",
-  messagingSenderId: "950201336557",
-  appId: "1:950201336557:web:e8bdfa02d99512051f82e4"
-};
+const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEInl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// ====== EDIT THIS (your deployed createCheckout function URL) ======
+const CREATE_CHECKOUT_URL="PASTE_YOUR_createCheckout_URL_HERE"; // e.g. https://europe-west2-xxxxx.cloudfunctions.net/createCheckout
+// ================================================================
 
-// ---- Hook up your HTML IDs (change these if yours differ) ----
-const el = {
-  email: document.getElementById("email"),
-  pass: document.getElementById("password"),
-  msg: document.getElementById("msg"),
-  btnLogin: document.getElementById("btnLogin"),
-  btnCreate: document.getElementById("btnCreate"),
-  btnForgot: document.getElementById("btnForgot"),
-  btnLogout: document.getElementById("btnLogout"),
-  btnPay: document.getElementById("btnPay")
-};
+// Expected Firestore doc path: users/{uid}/access/status  with field: paid:true
+const ACCESS_DOC=(uid)=>doc(db,"users",uid,"access","status");
 
-function setMsg(text, type="info"){
-  if(!el.msg) return;
-  el.msg.textContent = text || "";
-  el.msg.className = "msg " + type; // optional styling
-}
+// ---- UI elements (must exist in your login.html) ----
+const el=(id)=>document.getElementById(id);
+const emailEl=el("email");
+const passEl=el("password");
+const loginBtn=el("loginBtn");
+const createBtn=el("createBtn");
+const forgotBtn=el("forgotBtn");
+const payBtn=el("payBtn");
+const logoutBtn=el("logoutBtn");
+const statusBox=el("statusBox"); // a div/p to show messages
+const appWrap=el("appWrap");     // wrapper for your "real app" section
+const authWrap=el("authWrap");   // wrapper for login form area
+const payWrap=el("payWrap");     // wrapper for payment card area
 
-function setButtons(disabled){
-  ["btnLogin","btnCreate","btnForgot","btnLogout","btnPay"].forEach(k=>{
-    if(el[k]) el[k].disabled = !!disabled;
-  });
-}
+// ---- helpers ----
+const qs=new URLSearchParams(location.search);
+const setMsg=(txt,type="info")=>{if(!statusBox)return;statusBox.textContent=txt||"";statusBox.style.display=txt?"block":"none";statusBox.dataset.type=type;};
+const show=(node,yes)=>{if(!node)return;node.style.display=yes?"block":"none";};
+const safeEmail=()=>String(emailEl?.value||"").trim();
+const safePass=()=>String(passEl?.value||"");
 
-async function checkPaid(uid){
-  // canonical path: users/{uid}/access/status  -> {paid:true}
-  const snap = await getDoc(doc(db,"users",uid,"access","status"));
-  return snap.exists() && snap.data().paid === true;
-}
+// This prevents "I’m logged in" showing just because Firebase restored a session silently
+let manualLogin=false;
 
-// ---- SINGLE auth observer (prevents flicker) ----
-let booted = false;
-onAuthStateChanged(auth, async (user) => {
-  if(!booted){ booted = true; } // first run
+// Persist manual intent for the “Stripe return” tab (so it still counts as intentional)
+const setManual=()=>{manualLogin=true;sessionStorage.setItem("manualLogin","1");};
+const loadManual=()=>{manualLogin=sessionStorage.getItem("manualLogin")==="1";};
+loadManual();
 
-  if(!user){
-    setMsg("Not logged in.", "ok");
-    if(el.btnLogout) el.btnLogout.style.display = "none";
-    if(el.btnPay) el.btnPay.style.display = "block";
-    return;
-  }
+// UI states
+function showLoggedOutUI(msg="Not logged in."){show(authWrap,true);show(payWrap,true);show(appWrap,false);if(logoutBtn)logoutBtn.style.display="none";setMsg(msg,"ok");}
+function showCheckingUI(msg="Checking access..."){show(authWrap,true);show(payWrap,true);show(appWrap,false);if(logoutBtn)logoutBtn.style.display="inline-block";setMsg(msg,"info");}
+function showPayUI(userEmail){show(authWrap,true);show(payWrap,true);show(appWrap,false);if(logoutBtn)logoutBtn.style.display="inline-block";setMsg(`You're logged in (${userEmail||"user"}), but you haven't paid yet.`,"warn");}
+function showAppUI(){show(authWrap,false);show(payWrap,false);show(appWrap,true);if(logoutBtn)logoutBtn.style.display="inline-block";setMsg("Access granted ✅","ok");}
 
-  setMsg("Signed in. Checking access…", "info");
-  if(el.btnLogout) el.btnLogout.style.display = "inline-block";
+// ---- Auth actions ----
+if(loginBtn)loginBtn.addEventListener("click",async(e)=>{e.preventDefault();try{setMsg("Signing in...","info");setManual();await signInWithEmailAndPassword(auth,safeEmail(),safePass());}catch(err){setMsg(err?.message||"Login failed.","err");}});
+if(createBtn)createBtn.addEventListener("click",async(e)=>{e.preventDefault();try{setMsg("Creating account...","info");setManual();await createUserWithEmailAndPassword(auth,safeEmail(),safePass());}catch(err){setMsg(err?.message||"Create account failed.","err");}});
+if(forgotBtn)forgotBtn.addEventListener("click",async(e)=>{e.preventDefault();try{const em=safeEmail();if(!em){setMsg("Enter your email first.","warn");return;}setMsg("Sending reset email...","info");await sendPasswordResetEmail(auth,em);setMsg("Password reset email sent.","ok");}catch(err){setMsg(err?.message||"Reset failed.","err");}});
 
+// ---- Logout (also clears the “manual login” intent so it won’t auto-show logged-in UI next visit) ----
+if(logoutBtn)logoutBtn.addEventListener("click",async(e)=>{e.preventDefault();try{await signOut(auth);}catch(_){}sessionStorage.removeItem("manualLogin");manualLogin=false;showLoggedOutUI("Not logged in.");});
+
+// ---- Pay button: calls your createCheckout Cloud Function (must accept {idToken} and return {url}) ----
+if(payBtn)payBtn.addEventListener("click",async(e)=>{e.preventDefault();try{
+  const u=auth.currentUser;
+  if(!u){setMsg("Please log in first, then pay.","warn");return;}
+  setManual(); // keep intent across Stripe return
+  setMsg("Opening checkout...","info");
+  const idToken=await u.getIdToken(true);
+  const res=await fetch(CREATE_CHECKOUT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken})});
+  if(!res.ok){const t=await res.text().catch(()=> "");throw new Error(`Checkout error (${res.status}). ${t}`);}
+  const data=await res.json();
+  if(!data?.url)throw new Error("No checkout URL returned.");
+  location.href=data.url;
+}catch(err){setMsg(err?.message||"Failed to start checkout.","err");}});
+
+// ---- Core: auth state + access check ----
+let checking=false;
+onAuthStateChanged(auth,async(user)=>{
+  if(checking) return;
+  checking=true;
   try{
-    const paid = await checkPaid(user.uid);
+    if(!user){showLoggedOutUI("Not logged in.");return;}
+
+    // ⛔ IMPORTANT: prevent silent restored sessions from showing “logged in”
+    // If you WANT auto-login UX, delete this block. You asked to stop the confusion.
+    if(!manualLogin){showLoggedOutUI("Not logged in.");return;}
+
+    showCheckingUI("Signed in. Checking access...");
+    const snap=await getDoc(ACCESS_DOC(user.uid));
+    const paid=!!(snap.exists() && snap.data()?.paid===true);
+
     if(paid){
-      setMsg("Access granted ✅ Redirecting…", "ok");
-      // go to your real app page
-      window.location.href = "app.html";
+      showAppUI();
     }else{
-      setMsg("You're logged in, but you haven’t paid yet.", "bad");
-      if(el.btnPay) el.btnPay.style.display = "block";
+      showPayUI(user.email||"");
     }
-  }catch(e){
-    console.error(e);
-    setMsg("Can’t check access (permissions / rules).", "bad");
+  }catch(err){
+    // If rules block read, you’ll see permission error here
+    const msg=String(err?.message||"Access check failed.");
+    setMsg(msg.includes("Missing or insufficient permissions")?"Missing or insufficient permissions. Check Firestore rules + path users/{uid}/access/status":"Access check failed: "+msg,"err");
+    // keep the user on login/pay UI
+    show(authWrap,true);show(payWrap,true);show(appWrap,false);
+    if(logoutBtn)logoutBtn.style.display="inline-block";
+  }finally{
+    checking=false;
   }
 });
 
-// ---- Actions ----
-el.btnLogin?.addEventListener("click", async () => {
-  setButtons(true);
-  setMsg("Signing in…","info");
-  try{
-    await signInWithEmailAndPassword(auth, el.email.value.trim(), el.pass.value);
-    // onAuthStateChanged handles next steps
-  }catch(e){
-    setMsg(e.message || "Login failed","bad");
-  }
-  setButtons(false);
-});
-
-el.btnCreate?.addEventListener("click", async () => {
-  setButtons(true);
-  setMsg("Creating account…","info");
-  try{
-    await createUserWithEmailAndPassword(auth, el.email.value.trim(), el.pass.value);
-  }catch(e){
-    setMsg(e.message || "Create failed","bad");
-  }
-  setButtons(false);
-});
-
-el.btnForgot?.addEventListener("click", async () => {
-  setButtons(true);
-  setMsg("Sending reset email…","info");
-  try{
-    await sendPasswordResetEmail(auth, el.email.value.trim());
-    setMsg("Password reset email sent ✅","ok");
-  }catch(e){
-    setMsg(e.message || "Reset failed","bad");
-  }
-  setButtons(false);
-});
-
-el.btnLogout?.addEventListener("click", async () => {
-  setButtons(true);
-  try{
-    await signOut(auth);
-    setMsg("Logged out.","ok");
-  }catch(e){
-    setMsg("Logout failed.","bad");
-  }
-  setButtons(false);
-});
-
-// IMPORTANT: Only allow Pay when logged in (so we can attach UID)
-el.btnPay?.addEventListener("click", async () => {
-  const user = auth.currentUser;
-  if(!user){
-    setMsg("Login first, then pay (so we can unlock the right account).","bad");
-    return;
-  }
-  // your existing createCheckout call should use user.getIdToken()
-  // (leave this as-is if it already works in your build)
-});
+// If Stripe redirected back and user is already authenticated, keep intent so it doesn’t show “Not logged in”
+if(qs.has("session_id")||qs.has("success")){setManual();}
 </script>
+```0
