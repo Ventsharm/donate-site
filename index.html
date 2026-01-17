@@ -36,3 +36,4 @@ if(!paid){show(payWrap,true);show(editorWrap,false);setMsg("You’re logged in, 
 show(payWrap,false);show(editorWrap,true);setMsg("Access granted ✅","ok");if(qs().has("success"))setMsg("Payment received ✅","ok");
 }catch(e){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(editorWrap,false);setHeader(false);logoutBtn.style.display=user?"inline-block":"none";switchUserBtn.style.display=user?"inline-block":"none";setMsg("Something went wrong:\n"+(e?.message||e),"err");}});
 }</script></body></html>
+```0
