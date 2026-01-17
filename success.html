@@ -1,1 +1,28 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Success</title><style>:root{--bg:#fff;--text:#111;--muted:#6b7280;--line:#e5e7eb;--ok:#16a34a;--bad:#dc2626;--info:#2563eb}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}.box{width:min(560px,100%);text-align:center}.big{font-size:72px;font-weight:1000;letter-spacing:-.04em;margin:10px 0}.sub{font-size:20px;color:var(--muted);margin:0 0 12px}.msg{margin:12px auto 18px;max-width:520px;border:1px solid var(--line);border-radius:16px;padding:14px;font-weight:800;background:#f8fafc}.msg.ok{background:#ecfdf5;border-color:#bbf7d0;color:#065f46}.msg.bad{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}.msg.info{background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a}a{color:#111;text-decoration:underline;font-weight:900}</style></head><body><div class="wrap"><div class="box"><div style="font-size:64px">✅</div><div class="big">Payment received</div><div class="sub">Unlocking your account…</div><div id="m" class="msg info">Checking login…</div><div><a href="login.html">Back to login</a></div></div></div><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getAuth,onAuthStateChanged,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};const APP_URL="app.html";const app=initializeApp(firebaseConfig);const auth=getAuth(app);const db=getFirestore(app);const m=document.getElementById("m");function setMsg(t,type){m.className="msg "+type;m.textContent=t}async function isPaid(user){const snapA=await getDoc(doc(db,"users",user.uid,"access","access"));if(snapA.exists()&&snapA.data()&&snapA.data().paid===true)return true;const snapB=await getDoc(doc(db,"users",user.uid));if(snapB.exists()&&snapB.data()&&snapB.data().paid===true)return true;return false}async function pollPaid(user){for(let i=0;i<15;i++){setMsg("Waiting for confirmation… ("+(i+1)+"/15)","info");try{if(await isPaid(user)){setMsg("Access confirmed. Redirecting…","ok");location.href=APP_URL;return}}catch(e){}await new Promise(r=>setTimeout(r,1200))}setMsg("Still not confirmed. Go back to login and it should unlock shortly.","bad")}await setPersistence(auth,browserLocalPersistence).catch(()=>{});onAuthStateChanged(auth,user=>{if(!user){setMsg("Not logged in. Please go back to login.","bad");return}pollPaid(user)});</script></body></html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Success</title><style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:#fff;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center} h1{font-size:56px;margin:10px 0} .sub{opacity:.7;font-size:18px} a{display:inline-block;margin-top:14px;font-weight:800;color:#111}</style></head><body><div><div style="font-size:70px">✅</div><h1>Payment received</h1><div class="sub" id="status">Unlocking your account…</div><a href="login.html">Back to login</a></div><script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const status=document.getElementById("status");
+
+async function hasPaid(uid){
+  const snap=await getDoc(doc(db,"users",uid));
+  return snap.exists() && snap.data()?.paid===true;
+}
+
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+
+onAuthStateChanged(auth,async(user)=>{
+  if(!user){status.textContent="Not logged in. Please go back to login.";return;}
+  for(let i=0;i<12;i++){
+    status.textContent="Waiting for confirmation… ("+(i+1)+"/12)";
+    try{
+      if(await hasPaid(user.uid)){location.href="app.html";return;}
+    }catch(e){}
+    await wait(1500);
+  }
+  status.textContent="Still not confirmed. Go back to login and tap Pay again if needed.";
+});
+</script></body></html>
