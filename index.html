@@ -1,1 +1,130 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Donate App – Login</title><style>html,body{height:100%}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f6ff;display:flex;align-items:center;justify-content:center;padding:24px}*{box-sizing:border-box}.card{width:min(560px,100%);background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:24px;box-shadow:0 16px 55px rgba(0,0,0,.10);padding:22px}.h1{font-size:54px;line-height:1;margin:0 0 10px;font-weight:900;letter-spacing:-1px;color:#0b1320}.sub{margin:0 0 12px;color:#3d4a63;font-weight:600}.topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.rightActions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.linkBtn{background:transparent;border:0;color:#1b4dd8;font-weight:900;font-size:18px;cursor:pointer;padding:8px 0}.smallBtn{background:#eef1f6;border:0;border-radius:14px;padding:10px 12px;font-weight:900;cursor:pointer;color:#0b1320}.msg{display:none;margin:12px 0 16px;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:700;white-space:pre-wrap}.msg[data-type="ok"]{background:#eafff1;color:#0f6b2f}.msg[data-type="warn"]{background:#ffecec;color:#a01414}.msg[data-type="err"]{background:#ffecec;color:#a01414}.row{display:grid;gap:10px;margin:12px 0}label{font-weight:900;color:#1e2a44}.in{width:100%;padding:14px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.14);background:#f1f6ff;font-size:16px;outline:none}.btn{width:100%;padding:15px 16px;border-radius:16px;border:0;font-size:18px;font-weight:900;cursor:pointer}.btnPrimary{background:#0b0b0d;color:#fff;box-shadow:0 10px 25px rgba(0,0,0,.18)}.btnGhost{background:#eef1f6;color:#0b1320}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.payCard{margin-top:16px;border-radius:18px;border:1px solid rgba(0,0,0,.10);padding:16px;background:#fff}.payTitle{font-size:22px;margin:0 0 6px;font-weight:900}.payText{margin:0 0 12px;color:#52607a;font-weight:650}.payBtn{background:#19c37d;color:#062a19;box-shadow:0 12px 30px rgba(25,195,125,.25)}.tiny{margin-top:10px;color:#5d6b86;font-size:13px;line-height:1.35}.appTitle{margin:0 0 10px;font-size:44px;letter-spacing:-1px}.goodPill{padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#eafff1;color:#0f6b2f;font-weight:900}.muted{margin:10px 0 0;color:#52607a;font-weight:650}.footerMini{margin-top:12px;color:#5d6b86;font-size:13px;font-weight:650;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}#bootCover{display:block}#authWrap,#payWrap,#appWrap{display:none}</style></head><body><div class="card"><div class="topRow"><div><h1 class="h1">Sign in</h1><p class="sub">Login first, then pay once to unlock the app.</p></div><div class="rightActions"><button id="switchUserBtn" class="smallBtn" type="button" style="display:none">Use different account</button><button id="logoutBtn" class="linkBtn" type="button" style="display:none">Logout</button></div></div><div id="statusBox" class="msg"></div><div id="bootCover" class="msg" style="display:block">Loading…</div><div id="authWrap"><div class="row"><label for="email">Email</label><input id="email" class="in" type="email" autocomplete="email" placeholder="you@email.com"/></div><div class="row"><label for="password">Password</label><input id="password" class="in" type="password" autocomplete="current-password" placeholder="••••••••"/></div><button id="loginBtn" class="btn btnPrimary" type="button">Login</button><div style="height:12px"></div><div class="grid2"><button id="createBtn" class="btn btnGhost" type="button">Create account</button><button id="forgotBtn" class="btn btnGhost" type="button">Forgot password</button></div></div><div id="payWrap" class="payCard"><div class="payTitle">Payment required.</div><p class="payText">Pay once to unlock the app.</p><button id="payBtn" class="btn payBtn" type="button">Pay £5</button><div class="tiny">After payment you’ll be redirected back here.</div></div><div id="appWrap" style="margin-top:16px"><h2 class="appTitle">Your account</h2><div class="goodPill">Access granted ✅</div><p class="muted">Put your real app UI here.</p></div><div class="footerMini"><span id="whoami"></span><span id="envHint"></span></div></div><script type="module">if(window.__donateLoginBooted)return;window.__donateLoginBooted=1;import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};const CREATE_CHECKOUT_URL="https://createcheckout-ywfufoyxmq-nw.a.run.app";const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);const ACCESS_DOC=(uid)=>doc(db,"users",uid,"access","status");const el=(id)=>document.getElementById(id),show=(n,y)=>{if(n)n.style.display=y?"block":"none"},disable=(b,y)=>{if(b){b.disabled=!!y;b.style.opacity=y?".7":"1";b.style.cursor=y?"not-allowed":"pointer"}};const statusBox=el("statusBox"),bootCover=el("bootCover"),authWrap=el("authWrap"),payWrap=el("payWrap"),appWrap=el("appWrap"),emailEl=el("email"),passEl=el("password"),loginBtn=el("loginBtn"),createBtn=el("createBtn"),forgotBtn=el("forgotBtn"),payBtn=el("payBtn"),logoutBtn=el("logoutBtn"),switchUserBtn=el("switchUserBtn"),whoami=el("whoami"),envHint=el("envHint");const qs=new URLSearchParams(location.search);const setMsg=(t,type="info")=>{statusBox.textContent=t||"";statusBox.style.display=t?"block":"none";statusBox.dataset.type=type;};const safeEmail=()=>String(emailEl?.value||"").trim(),safePass=()=>String(passEl?.value||"");try{await setPersistence(auth,browserLocalPersistence)}catch(_){}const setWho=(u)=>{if(!whoami)return;whoami.textContent=u?.email?u.email:""};if(envHint)envHint.textContent="";function uiBoot(){setMsg("", "info");show(bootCover,true);show(authWrap,false);show(payWrap,false);show(appWrap,false);show(logoutBtn,false);show(switchUserBtn,false)}function uiLoggedOut(msg){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,false);show(switchUserBtn,false);setMsg(msg||"Not logged in.","ok");setWho(null)}function uiChecking(u){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,true);show(switchUserBtn,true);setMsg("Signed in. Checking access…","info");setWho(u)}function uiNeedPay(u){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,true);show(switchUserBtn,true);setMsg("You’re logged in, but you haven’t paid yet.","warn");setWho(u)}function uiGranted(u){show(bootCover,false);show(authWrap,false);show(payWrap,false);show(appWrap,true);show(logoutBtn,true);show(switchUserBtn,true);setMsg("Access granted ✅","ok");setWho(u)}function uiError(u,msg){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,!!u);show(switchUserBtn,!!u);setMsg(msg,"err");setWho(u||null)}loginBtn?.addEventListener("click",async()=>{try{disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Signing in…","info");await signInWithEmailAndPassword(auth,safeEmail(),safePass())}catch(e){uiError(null,e?.message||"Login failed.")}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false)}});createBtn?.addEventListener("click",async()=>{try{disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Creating account…","info");await createUserWithEmailAndPassword(auth,safeEmail(),safePass())}catch(e){uiError(null,e?.message||"Create account failed.")}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false)}});forgotBtn?.addEventListener("click",async()=>{try{const em=safeEmail();if(!em){setMsg("Enter your email first.","warn");return}disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Sending reset email…","info");await sendPasswordResetEmail(auth,em);setMsg("Password reset email sent.","ok")}catch(e){uiError(auth.currentUser||null,e?.message||"Reset failed.")}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false)}});logoutBtn?.addEventListener("click",async()=>{try{await signOut(auth)}catch(_){}uiLoggedOut("Not logged in.")});switchUserBtn?.addEventListener("click",async()=>{try{await signOut(auth)}catch(_){}if(emailEl)emailEl.value="";if(passEl)passEl.value="";uiLoggedOut("Not logged in. (Ready for a different account)")});payBtn?.addEventListener("click",async()=>{try{const u=auth.currentUser;if(!u){setMsg("Please log in first, then pay.","warn");return}disable(payBtn,true);setMsg("Opening checkout…","info");const idToken=await u.getIdToken(true);const res=await fetch(CREATE_CHECKOUT_URL,{method:"POST",headers:{"Authorization":"Bearer "+idToken}});const text=await res.text().catch(()=> "");let data=null;try{data=JSON.parse(text)}catch(_){}if(!res.ok){uiError(u,"Checkout error ("+res.status+"): "+text);return}if(!data||!data.url){uiError(u,"No checkout URL returned: "+text);return}location.href=data.url}catch(e){uiError(auth.currentUser||null,e?.message||"Failed to start checkout.")}finally{disable(payBtn,false)}});let checking=false;uiBoot();onAuthStateChanged(auth,async(user)=>{if(checking)return;checking=true;try{if(!user){uiLoggedOut("Not logged in.");return}uiChecking(user);const snap=await getDoc(ACCESS_DOC(user.uid));const paid=!!(snap.exists()&&snap.data()?.paid===true);if(paid)uiGranted(user);else uiNeedPay(user)}catch(e){const m=String(e?.message||"");if(m.includes("auth/api-key-not-valid"))uiError(user,"Firebase config error: API key not valid.");else if(m.toLowerCase().includes("missing or insufficient permissions"))uiError(user,"Missing or insufficient permissions. Rules must allow read for users/{uid}/access/status and the doc must exist.");else uiError(user,"Access check failed: "+m)}finally{checking=false}});if(qs.has("session_id")||qs.has("success"))setMsg("Returned from payment. Checking access…","info");</script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Donate App – Login</title><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/><meta http-equiv="Pragma" content="no-cache"/><meta http-equiv="Expires" content="0"/><style>html,body{height:100%}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f6ff;display:flex;align-items:center;justify-content:center;padding:24px}*{box-sizing:border-box}.card{width:min(560px,100%);background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:24px;box-shadow:0 16px 55px rgba(0,0,0,.10);padding:22px}.h1{font-size:54px;line-height:1;margin:0 0 10px;font-weight:900;letter-spacing:-1px;color:#0b1320}.sub{margin:0 0 14px;color:#3d4a63;font-weight:650}.topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.rightActions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.linkBtn{background:transparent;border:0;color:#1b4dd8;font-weight:900;font-size:18px;cursor:pointer;padding:8px 0}.smallBtn{background:#eef1f6;border:0;border-radius:14px;padding:10px 12px;font-weight:900;cursor:pointer;color:#0b1320}.msg{display:none;margin:12px 0 16px;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:800;white-space:pre-wrap}.msg[data-type="ok"]{background:#eafff1;color:#0f6b2f}.msg[data-type="warn"]{background:#ffecec;color:#a01414}.msg[data-type="err"]{background:#ffecec;color:#a01414}.row{display:grid;gap:10px;margin:12px 0}label{font-weight:900;color:#1e2a44}.in{width:100%;padding:14px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.14);background:#f1f6ff;font-size:16px;outline:none}.btn{width:100%;padding:15px 16px;border-radius:16px;border:0;font-size:18px;font-weight:900;cursor:pointer}.btnPrimary{background:#0b0b0d;color:#fff;box-shadow:0 10px 25px rgba(0,0,0,.18)}.btnGhost{background:#eef1f6;color:#0b1320}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.payCard{margin-top:16px;border-radius:18px;border:1px solid rgba(0,0,0,.10);padding:16px;background:#fff}.payTitle{font-size:22px;margin:0 0 6px;font-weight:900}.payText{margin:0 0 12px;color:#52607a;font-weight:650}.payBtn{background:#19c37d;color:#062a19;box-shadow:0 12px 30px rgba(25,195,125,.25)}.tiny{margin-top:10px;color:#5d6b86;font-size:13px;line-height:1.35}.appTitle{margin:0 0 10px;font-size:44px;letter-spacing:-1px}.goodPill{padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#eafff1;color:#0f6b2f;font-weight:900}.skeleton{padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:900}.muted{margin:10px 0 0;color:#52607a;font-weight:650}.footerMini{margin-top:12px;color:#5d6b86;font-size:13px;font-weight:650;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}#bootCover{display:block}#authWrap,#payWrap,#appWrap{display:none}</style></head><body><div class="card"><div class="topRow"><div><h1 class="h1">Sign in</h1><p class="sub">Login first, then pay once to unlock the app.</p></div><div class="rightActions"><button id="switchUserBtn" class="smallBtn" type="button" style="display:none">Use different account</button><button id="logoutBtn" class="linkBtn" type="button" style="display:none">Logout</button></div></div><div id="statusBox" class="msg"></div><div id="bootCover" class="skeleton">Loading…</div><div id="authWrap"><div class="row"><label for="email">Email</label><input id="email" class="in" type="email" autocomplete="email" placeholder="you@email.com"/></div><div class="row"><label for="password">Password</label><input id="password" class="in" type="password" autocomplete="current-password" placeholder="••••••••"/></div><button id="loginBtn" class="btn btnPrimary" type="button">Login</button><div style="height:12px"></div><div class="grid2"><button id="createBtn" class="btn btnGhost" type="button">Create account</button><button id="forgotBtn" class="btn btnGhost" type="button">Forgot password</button></div></div><div id="payWrap" class="payCard"><div class="payTitle">Payment required.</div><p class="payText">Pay once to unlock the app.</p><button id="payBtn" class="btn payBtn" type="button">Pay £5</button><div class="tiny">After payment you’ll be redirected back here. If you paid and it still says unpaid, tap “Logout” then login again.</div></div><div id="appWrap" style="margin-top:16px"><h2 class="appTitle">Your account</h2><div class="goodPill">Access granted ✅</div><p class="muted">Put your real app UI here.</p></div><div class="footerMini"><span id="whoami"></span><span id="buildTag"></span></div></div><script>(function(){if(window.__donateLoginBooted)return;window.__donateLoginBooted=1;var sb=document.getElementById("statusBox");function setMsg(t,type){if(!sb)return;sb.textContent=t||"";sb.style.display=t?"block":"none";sb.dataset.type=type||"info"}window.addEventListener("error",function(e){setMsg("JS ERROR:\n"+(e.message||e.error||e),"err")});window.addEventListener("unhandledrejection",function(e){var r=e&&e.reason;setMsg("PROMISE ERROR:\n"+((r&&r.message)?r.message:String(r)),"err")});setMsg("","info")})();</script><script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* ✅ YOUR Firebase config (exactly as you posted) */
+const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};
+
+/* ✅ Your Cloud Run createCheckout URL */
+const CREATE_CHECKOUT_URL="https://createcheckout-ywfufoyxmq-nw.a.run.app";
+
+/* ✅ Firestore access doc path */
+const ACCESS_DOC=(uid)=>doc(db,"users",uid,"access","status");
+
+const el=(id)=>document.getElementById(id);
+const statusBox=el("statusBox"),bootCover=el("bootCover"),authWrap=el("authWrap"),payWrap=el("payWrap"),appWrap=el("appWrap");
+const emailEl=el("email"),passEl=el("password"),loginBtn=el("loginBtn"),createBtn=el("createBtn"),forgotBtn=el("forgotBtn"),payBtn=el("payBtn"),logoutBtn=el("logoutBtn"),switchUserBtn=el("switchUserBtn");
+const whoami=el("whoami"),buildTag=el("buildTag");
+
+const show=(n,y)=>{if(n)n.style.display=y?"block":"none"};
+const disable=(btn,y)=>{if(btn){btn.disabled=!!y;btn.style.opacity=y?".7":"1";btn.style.cursor=y?"not-allowed":"pointer"}};
+const setMsg=(t,type="info")=>{if(!statusBox)return;statusBox.textContent=t||"";statusBox.style.display=t?"block":"none";statusBox.dataset.type=type;};
+const safeEmail=()=>String(emailEl?.value||"").trim();
+const safePass=()=>String(passEl?.value||"");
+const qs=new URLSearchParams(location.search);
+
+buildTag.textContent="build: "+new Date().toISOString().slice(0,16).replace("T"," ");
+function setWho(u){whoami.textContent=u?.email?u.email:"";}
+
+function uiBoot(){setMsg("", "info");show(bootCover,true);show(authWrap,false);show(payWrap,false);show(appWrap,false);show(logoutBtn,false);show(switchUserBtn,false);setWho(null)}
+function uiLoggedOut(msg){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,false);show(switchUserBtn,false);setMsg(msg||"Not logged in.","ok");setWho(null)}
+function uiChecking(u){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,true);show(switchUserBtn,true);setMsg("Signed in. Checking access…","info");setWho(u)}
+function uiNeedPay(u){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,true);show(switchUserBtn,true);setMsg("You’re logged in, but you haven’t paid yet.","warn");setWho(u)}
+function uiGranted(u){show(bootCover,false);show(authWrap,false);show(payWrap,false);show(appWrap,true);show(logoutBtn,true);show(switchUserBtn,true);setMsg("Access granted ✅","ok");setWho(u)}
+function uiError(u,msg){show(bootCover,false);show(authWrap,true);show(payWrap,true);show(appWrap,false);show(logoutBtn,!!u);show(switchUserBtn,!!u);setMsg(msg,"err");setWho(u||null)}
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+/* keep login */
+try{setPersistence(auth,browserLocalPersistence)}catch(_){}
+
+/* actions */
+loginBtn?.addEventListener("click",async()=>{try{disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Signing in…","info");await signInWithEmailAndPassword(auth,safeEmail(),safePass());}catch(err){uiError(null,err?.message||"Login failed.");}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);}});
+createBtn?.addEventListener("click",async()=>{try{disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Creating account…","info");await createUserWithEmailAndPassword(auth,safeEmail(),safePass());}catch(err){uiError(null,err?.message||"Create account failed.");}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);}});
+forgotBtn?.addEventListener("click",async()=>{try{const em=safeEmail();if(!em){setMsg("Enter your email first.","warn");return;}disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Sending reset email…","info");await sendPasswordResetEmail(auth,em);setMsg("Password reset email sent.","ok");}catch(err){uiError(auth.currentUser||null,err?.message||"Reset failed.");}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);}});
+logoutBtn?.addEventListener("click",async()=>{try{await signOut(auth);}catch(_){ }uiLoggedOut("Not logged in.");});
+switchUserBtn?.addEventListener("click",async()=>{try{await signOut(auth);}catch(_){ }if(emailEl)emailEl.value="";if(passEl)passEl.value="";uiLoggedOut("Ready for a different account.");});
+
+/* checkout */
+payBtn?.addEventListener("click",async()=>{try{
+  const u=auth.currentUser;
+  if(!u){setMsg("Please log in first, then pay.","warn");return;}
+  disable(payBtn,true);setMsg("Opening checkout…","info");
+
+  const idToken=await u.getIdToken(true);
+
+  const cleanPath=location.origin+location.pathname; // always ends with /donate-site/ or /donate-site/index.html
+  const successUrl=cleanPath+(cleanPath.includes("?")?"&":"?")+"success=1";
+  const cancelUrl=cleanPath;
+
+  const res=await fetch(CREATE_CHECKOUT_URL,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+idToken
+    },
+    body:JSON.stringify({idToken,successUrl,cancelUrl})
+  });
+
+  // handle redirects (some backends respond 303 to Stripe)
+  if([301,302,303,307,308].includes(res.status)){
+    const loc=res.headers.get("Location");
+    if(loc){location.href=loc;return;}
+  }
+
+  const ct=(res.headers.get("content-type")||"").toLowerCase();
+  const raw=await res.text().catch(()=> "");
+  if(!res.ok){
+    throw new Error("Checkout error ("+res.status+"):\n"+(raw||"(no response body)"));
+  }
+
+  let data=null;
+  if(ct.includes("application/json")){
+    try{data=JSON.parse(raw||"{}")}catch(e){throw new Error("Checkout returned invalid JSON:\n"+raw);}
+  }else{
+    // if backend accidentally returned plain text, show it
+    throw new Error("Checkout did not return JSON.\nGot:\n"+raw);
+  }
+
+  const url=data?.url||data?.checkoutUrl||data?.checkout_url||data?.sessionUrl||data?.redirectUrl||null;
+  if(!url) throw new Error("No checkout URL returned.\nResponse was:\n"+JSON.stringify(data,null,2));
+
+  location.href=url;
+}catch(err){
+  uiError(auth.currentUser||null,err?.message||"Failed to start checkout.");
+}finally{
+  disable(payBtn,false);
+}});
+
+/* access check */
+let checking=false;
+uiBoot();
+
+onAuthStateChanged(auth,async(user)=>{
+  if(checking)return;checking=true;
+  try{
+    if(!user){uiLoggedOut("Not logged in.");return;}
+    uiChecking(user);
+
+    const snap=await getDoc(doc(db,"users",user.uid,"access","status"));
+    const paid=!!(snap.exists() && snap.data()?.paid===true);
+
+    if(paid) uiGranted(user);
+    else uiNeedPay(user);
+
+    if(qs.has("success")) setMsg("Payment received. If it still says unpaid, tap Logout then login again.","ok");
+  }catch(err){
+    const m=String(err?.message||"");
+    if(m.toLowerCase().includes("missing or insufficient permissions")){
+      uiError(user,"Permissions error reading Firestore.\nYour rules MUST allow:\nusers/{uid}/access/status (read)\n\nIf you already deployed rules, then the doc may not exist for this user yet.");
+    }else{
+      uiError(user,"Access check failed:\n"+m);
+    }
+  }finally{
+    checking=false;
+  }
+});
+</script></body></html>
