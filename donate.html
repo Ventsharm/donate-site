@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Donate</title><style>html,body{height:100%}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f6ff;display:flex;align-items:center;justify-content:center;padding:24px}*{box-sizing:border-box}.card{width:min(740px,100%);background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:24px;box-shadow:0 16px 55px rgba(0,0,0,.10);padding:22px}.h1{font-size:44px;line-height:1.05;margin:0 0 10px;font-weight:900;letter-spacing:-1px;color:#0b1320}.sub{margin:0 0 14px;color:#3d4a63;font-weight:650}.msg{margin:12px 0 16px;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:800;white-space:pre-wrap}.about{background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:18px;padding:16px;color:#1e2a44;line-height:1.55;font-weight:650;white-space:pre-wrap}.btn{width:100%;padding:15px 16px;border-radius:16px;border:0;font-size:18px;font-weight:900;cursor:pointer}.btnPrimary{background:#19c37d;color:#062a19;box-shadow:0 12px 30px rgba(25,195,125,.25)}.tiny{margin-top:10px;color:#5d6b86;font-size:13px;line-height:1.35}.row{display:grid;gap:12px;margin-top:14px}</style></head><body><div class="card"><h1 id="title" class="h1">Donate</h1><p class="sub">Thank you for supporting.</p><div id="status" class="msg">Loading…</div><div id="about" class="about" style="display:none"></div><div class="row" id="actions" style="display:none"><button id="donateBtn" class="btn btnPrimary" type="button">Donate</button><div class="tiny">You’ll be taken to a secure Stripe page to donate.</div></div></div><script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};
+const app=initializeApp(firebaseConfig),db=getFirestore(app);
+
+const qs=new URLSearchParams(location.search);
+const uid=qs.get("u");
+
+const status=document.getElementById("status");
+const titleEl=document.getElementById("title");
+const aboutEl=document.getElementById("about");
+const actions=document.getElementById("actions");
+const donateBtn=document.getElementById("donateBtn");
+
+function setStatus(t){status.textContent=t||"";}
+function show(el,on){el.style.display=on?"block":"none";}
+function clean(s){return String(s||"").trim();}
+
+if(!uid){setStatus("Missing link.\nThis page needs ?u=USER_ID");throw new Error("missing uid");}
+
+try{
+  const snap=await getDoc(doc(db,"campaigns",uid));
+  if(!snap.exists()){setStatus("This donation page hasn’t been set up yet.");throw new Error("no campaign");}
+  const d=snap.data()||{};
+  const title=clean(d.title)||"Donate";
+  const about=clean(d.about)||"";
+  const paylink=clean(d.paylink)||"";
+  titleEl.textContent=title;
+  aboutEl.textContent=about||"";
+  if(!paylink.startsWith("https://")){setStatus("This page is missing a valid payment link.");throw new Error("no paylink");}
+  donateBtn.onclick=()=>{location.href=paylink;};
+  setStatus("✅ Ready");
+  show(aboutEl,!!aboutEl.textContent);
+  show(actions,true);
+}catch(e){
+  // status already set
+}
+</script></body></html>
