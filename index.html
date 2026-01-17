@@ -1,35 +1,422 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Donate App</title><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/><meta http-equiv="Pragma" content="no-cache"/><meta http-equiv="Expires" content="0"/><script>(function(){try{var q=new URLSearchParams(location.search);if(q.get("c"))document.documentElement.classList.add("mode-public");else document.documentElement.classList.add("mode-private");}catch(e){}})();</script><style>html,body{height:100%}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f6ff;display:flex;align-items:flex-start;justify-content:center;padding:22px}*{box-sizing:border-box}.wrap{width:min(760px,100%)}.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:24px;box-shadow:0 16px 55px rgba(0,0,0,.10);padding:22px}.h1{font-size:54px;line-height:1;margin:0 0 10px;font-weight:900;letter-spacing:-1px;color:#0b1320}.sub{margin:0 0 14px;color:#3d4a63;font-weight:650}.topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.rightActions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.linkBtn{background:transparent;border:0;color:#1b4dd8;font-weight:900;font-size:18px;cursor:pointer;padding:8px 0}.smallBtn{background:#eef1f6;border:0;border-radius:14px;padding:10px 12px;font-weight:900;cursor:pointer;color:#0b1320}.msg{display:none;margin:12px 0 16px;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:850;white-space:pre-wrap;word-break:break-word}.msg[data-type="ok"]{background:#eafff1;color:#0f6b2f}.msg[data-type="warn"]{background:#fff1e6;color:#8a3b00}.msg[data-type="err"]{background:#ffecec;color:#a01414}.row{display:grid;gap:10px;margin:12px 0}label{font-weight:900;color:#1e2a44}.in{width:100%;padding:14px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.14);background:#f1f6ff;font-size:16px;outline:none}.ta{min-height:120px;resize:vertical}.btn{width:100%;padding:15px 16px;border-radius:16px;border:0;font-size:18px;font-weight:900;cursor:pointer}.btnPrimary{background:#0b0b0d;color:#fff;box-shadow:0 10px 25px rgba(0,0,0,.18)}.btnGhost{background:#eef1f6;color:#0b1320}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:520px){.grid2{grid-template-columns:1fr}.h1{font-size:46px}}.box{margin-top:16px;border-radius:18px;border:1px solid rgba(0,0,0,.10);padding:16px;background:#fff}.boxTitle{font-size:22px;margin:0 0 6px;font-weight:900}.boxText{margin:0 0 12px;color:#52607a;font-weight:650}.payBtn{background:#19c37d;color:#062a19;box-shadow:0 12px 30px rgba(25,195,125,.25)}.tiny{margin-top:10px;color:#5d6b86;font-size:13px;line-height:1.35}.skeleton{padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:900}.pill{padding:10px 12px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:900;display:inline-flex;gap:8px;align-items:center}.pillOk{background:#eafff1;color:#0f6b2f}.divider{height:1px;background:rgba(0,0,0,.08);margin:14px 0}.publicTitle{font-size:44px;margin:0 0 10px;letter-spacing:-1px}.muted{margin:10px 0 0;color:#52607a;font-weight:650}.footerMini{margin-top:12px;color:#5d6b86;font-size:13px;font-weight:650;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.hide{display:none!important}.mode-public #headSignedOut,.mode-public #headSignedIn{display:none!important}.mode-public #headPublic{display:block!important}.mode-public #rightActions{display:none!important}</style></head><body><div class="wrap"><div class="card"><div class="topRow"><div id="headSignedOut"><h1 class="h1">Sign in</h1><p class="sub">Login first, then pay once to unlock the app.</p></div><div id="headSignedIn" class="hide"><h1 class="h1" style="margin-bottom:6px">Your campaign</h1><p class="sub" style="margin-bottom:0">Edit your page and share your public link.</p></div><div id="headPublic" class="hide"><h1 id="headPublicTitle" class="h1" style="margin-bottom:6px">Campaign</h1><p class="sub" style="margin-bottom:0">Donate securely via Stripe.</p></div><div class="rightActions" id="rightActions"><button id="switchUserBtn" class="smallBtn" type="button" style="display:none">Use different account</button><button id="logoutBtn" class="linkBtn" type="button" style="display:none">Logout</button></div></div><div id="statusBox" class="msg"></div><div id="bootCover" class="skeleton">Loading…</div><div id="publicWrap" class="hide"><div id="pubAbout" class="msg" style="display:block" data-type="info"></div><div class="box"><div class="boxTitle">Donate</div><p class="boxText">Tap the button to donate securely.</p><a id="donateLink" class="btn btnPrimary" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none;text-align:center">Donate</a><div class="tiny" id="pubTiny"></div></div><div class="footerMini"><span id="pubFootLeft"></span><span id="pubFootRight"></span></div></div><div id="privateWrap" class="hide"><div id="authWrap"><div class="row"><label for="email">Email</label><input id="email" class="in" type="email" autocomplete="email" placeholder="you@email.com"/></div><div class="row"><label for="password">Password</label><input id="password" class="in" type="password" autocomplete="current-password" placeholder="••••••••"/></div><button id="loginBtn" class="btn btnPrimary" type="button">Login</button><div style="height:12px"></div><div class="grid2"><button id="createBtn" class="btn btnGhost" type="button">Create account</button><button id="forgotBtn" class="btn btnGhost" type="button">Forgot password</button></div></div><div id="verifyWrap" class="box hide"><div class="boxTitle">Verify your email</div><p class="boxText">We’ve sent you a verification email. Open it and confirm, then come back and tap “I’ve verified”.</p><div class="grid2"><button id="refreshVerifyBtn" class="btn btnPrimary" type="button">I’ve verified</button><button id="resendVerifyBtn" class="btn btnGhost" type="button">Resend email</button></div><div class="tiny">If you used the wrong email, tap “Logout”, then “Use different account”.</div></div><div id="payWrap" class="box hide"><div class="boxTitle">Payment required.</div><p class="boxText">Pay once to unlock editing.</p><button id="payBtn" class="btn payBtn" type="button">Pay £5</button><div class="tiny">After payment you’ll be redirected back here. If it still says unpaid, tap “Logout” then login again.</div></div><div id="editorWrap" class="hide"><div class="divider"></div><div class="pill pillOk">✅ Unlocked</div><p class="muted" style="margin-top:12px">Fill in your campaign and your Stripe Payment Link. Then share your public page.</p><div class="row"><label for="campTitle">Campaign title</label><input id="campTitle" class="in" type="text" maxlength="80" placeholder="e.g. Help with rent"/></div><div class="row"><label for="campAbout">About (why you need donations)</label><textarea id="campAbout" class="in ta" maxlength="1200" placeholder="Write a short explanation…"></textarea></div><div class="row"><label for="campStripe">Your Stripe Payment Link URL</label><input id="campStripe" class="in" type="url" placeholder="https://buy.stripe.com/..."/></div><div class="grid2"><button id="saveBtn" class="btn btnPrimary" type="button">Save campaign</button><button id="copyBtn" class="btn btnGhost" type="button">Copy public link</button></div><div class="row" style="margin-top:14px"><div class="skeleton" id="publicLinkBox"></div></div><div class="tiny">How to get your Stripe link: open Stripe Dashboard → Payment Links → New, set amount/description, create, then copy the Payment Link URL and paste it above.</div></div><div class="footerMini"><span id="whoami"></span><span id="buildTag"></span></div></div></div></div></div><script>(function(){if(window.__donateBooted)return;window.__donateBooted=1;var sb=document.getElementById("statusBox");function setMsg(t,type){if(!sb)return;sb.textContent=t||"";sb.style.display=t?"block":"none";sb.dataset.type=type||"info"}window.addEventListener("error",function(e){setMsg("JS ERROR:\n"+(e.message||e.error||e),"err")});window.addEventListener("unhandledrejection",function(e){var r=e&&e.reason;setMsg("PROMISE ERROR:\n"+((r&&r.message)?r.message:String(r)),"err")});window.__setMsg=setMsg;})();</script><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,setPersistence,browserLocalPersistence,sendEmailVerification}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";import{getFirestore,doc,getDoc,setDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};const CREATE_CHECKOUT_URL="https://createcheckout-ywfufoyxmq-nw.a.run.app";const el=(id)=>document.getElementById(id);const setMsg=(t,type="info")=>window.__setMsg?window.__setMsg(t,type):null;const show=(n,y)=>{if(!n)return;y?n.classList.remove("hide"):n.classList.add("hide")};const disable=(b,y)=>{if(!b)return;b.disabled=!!y;b.style.opacity=y?".75":"1";b.style.cursor=y?"not-allowed":"pointer"};const qs=()=>new URLSearchParams(location.search);const basePath=()=>{const p=location.pathname.replace(/\/index(\.html)?$/,"/");return location.origin+(p.endsWith("/")?p:p+"/")};const app=initializeApp(firebaseConfig);const auth=getAuth(app);const db=getFirestore(app);try{setPersistence(auth,browserLocalPersistence)}catch(_){}
-const bootCover=el("bootCover"),publicWrap=el("publicWrap"),privateWrap=el("privateWrap"),authWrap=el("authWrap"),verifyWrap=el("verifyWrap"),payWrap=el("payWrap"),editorWrap=el("editorWrap"),logoutBtn=el("logoutBtn"),switchUserBtn=el("switchUserBtn"),whoami=el("whoami"),buildTag=el("buildTag"),publicLinkBox=el("publicLinkBox");
-const headSignedOut=el("headSignedOut"),headSignedIn=el("headSignedIn"),headPublic=el("headPublic"),headPublicTitle=el("headPublicTitle");
-const emailEl=el("email"),passEl=el("password"),loginBtn=el("loginBtn"),createBtn=el("createBtn"),forgotBtn=el("forgotBtn"),payBtn=el("payBtn"),refreshVerifyBtn=el("refreshVerifyBtn"),resendVerifyBtn=el("resendVerifyBtn"),saveBtn=el("saveBtn"),copyBtn=el("copyBtn");
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Donate Site</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<style>
+:root{--bg:#f3f6ff;--card:#fff;--text:#0b1320;--muted:#52607a;--line:rgba(0,0,0,.10);--pill:#f1f6ff;--btn:#0b0b0d;--ok:#eafff1;--okText:#0f6b2f;--err:#ffecec;--errText:#a01414;--warn:#fff1f2;--warnText:#9f1239;--green:#19c37d}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:22px}
+.card{width:min(560px,100%);background:var(--card);border:1px solid rgba(0,0,0,.08);border-radius:24px;box-shadow:0 16px 55px rgba(0,0,0,.10);padding:22px}
+.h1{font-size:54px;line-height:1;margin:0 0 10px;font-weight:900;letter-spacing:-1px}
+.sub{margin:0 0 14px;color:#3d4a63;font-weight:650}
+.msg{display:none;margin:12px 0 16px;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:#f6f8ff;color:#1e2a44;font-weight:800;white-space:pre-wrap}
+.msg[data-type="ok"]{background:var(--ok);color:var(--okText)}
+.msg[data-type="warn"]{background:var(--warn);color:var(--warnText)}
+.msg[data-type="err"]{background:var(--err);color:var(--errText)}
+.row{display:grid;gap:10px;margin:12px 0}
+label{font-weight:900;color:#1e2a44}
+.in{width:100%;padding:14px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.14);background:var(--pill);font-size:16px;outline:none}
+textarea.in{min-height:120px;resize:vertical}
+.btn{width:100%;padding:15px 16px;border-radius:16px;border:0;font-size:18px;font-weight:900;cursor:pointer}
+.btnPrimary{background:var(--btn);color:#fff;box-shadow:0 10px 25px rgba(0,0,0,.18)}
+.btnGhost{background:#eef1f6;color:var(--text)}
+.btnGreen{background:var(--green);color:#062a19;box-shadow:0 12px 30px rgba(25,195,125,.25)}
+.btnDanger{background:#fee2e2;color:#991b1b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rightActions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.smallBtn{background:#eef1f6;border:0;border-radius:14px;padding:10px 12px;font-weight:900;cursor:pointer;color:var(--text)}
+.linkBtn{background:transparent;border:0;color:#1b4dd8;font-weight:900;font-size:18px;cursor:pointer;padding:8px 0}
+.hr{height:1px;background:rgba(0,0,0,.08);margin:14px 0}
+.pillOk{padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:var(--ok);color:var(--okText);font-weight:900}
+.muted{margin:10px 0 0;color:var(--muted);font-weight:650}
+.tiny{margin-top:10px;color:#5d6b86;font-size:13px;line-height:1.35}
+.linkBox{margin-top:12px;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.10);background:#f6f8ff;font-weight:800;word-break:break-all}
+.center{text-align:center}
+#bootCover{display:block}
+#loginWrap,#verifyWrap,#editorWrap,#publicWrap{display:none}
+.publicTitle{font-size:48px;line-height:1.05;margin:0 0 8px;font-weight:950;letter-spacing:-1px}
+.publicAbout{margin:0 0 14px;color:#334155;font-weight:650;white-space:pre-wrap}
+.box{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff}
+.boxTitle{font-size:22px;margin:0 0 6px;font-weight:900}
+@media(max-width:420px){.h1{font-size:44px}.publicTitle{font-size:42px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+
+    <!-- header area (changes per mode) -->
+    <div class="topRow">
+      <div>
+        <h1 id="headerTitle" class="h1">Sign in</h1>
+        <p id="headerSub" class="sub">Create or sign in to manage your campaign.</p>
+      </div>
+      <div class="rightActions">
+        <button id="switchUserBtn" class="smallBtn" type="button" style="display:none">Use different account</button>
+        <button id="logoutBtn" class="linkBtn" type="button" style="display:none">Logout</button>
+      </div>
+    </div>
+
+    <div id="statusBox" class="msg"></div>
+    <div id="bootCover" class="msg" data-type="ok" style="display:block">Loading…</div>
+
+    <!-- LOGIN -->
+    <div id="loginWrap">
+      <div class="row">
+        <label for="email">Email</label>
+        <input id="email" class="in" type="email" autocomplete="email" placeholder="you@email.com"/>
+      </div>
+      <div class="row">
+        <label for="password">Password</label>
+        <input id="password" class="in" type="password" autocomplete="current-password" placeholder="••••••••"/>
+      </div>
+      <button id="loginBtn" class="btn btnPrimary" type="button">Login</button>
+      <div style="height:12px"></div>
+      <div class="grid2">
+        <button id="createBtn" class="btn btnGhost" type="button">Create account</button>
+        <button id="forgotBtn" class="btn btnGhost" type="button">Forgot password</button>
+      </div>
+      <p class="tiny">Tip: If you don’t have an account yet, tap <b>Create account</b>.</p>
+    </div>
+
+    <!-- VERIFY EMAIL -->
+    <div id="verifyWrap">
+      <div class="pillOk">One last step ✅</div>
+      <p class="muted" style="margin-top:10px">We’ve sent a verification email. Please open it and tap the link, then come back here.</p>
+      <div style="height:12px"></div>
+      <button id="resendBtn" class="btn btnGhost" type="button">Resend verification email</button>
+      <div style="height:12px"></div>
+      <button id="checkVerifiedBtn" class="btn btnPrimary" type="button">I verified — Continue</button>
+      <p class="tiny">If you can’t find it, check spam/junk.</p>
+    </div>
+
+    <!-- EDITOR (LOGGED IN) -->
+    <div id="editorWrap">
+      <div class="pillOk">Unlocked ✅</div>
+      <p class="muted">Fill in your campaign and your Stripe Payment Link, then share your public page.</p>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <label for="campTitle">Campaign title</label>
+        <input id="campTitle" class="in" placeholder="e.g. Help me buy a home"/>
+      </div>
+
+      <div class="row">
+        <label for="campAbout">About (why you need donations)</label>
+        <textarea id="campAbout" class="in" placeholder="Write a short explanation…"></textarea>
+      </div>
+
+      <div class="row">
+        <label for="campStripe">Your Stripe Payment Link URL</label>
+        <input id="campStripe" class="in" placeholder="https://buy.stripe.com/..." inputmode="url"/>
+      </div>
+
+      <div class="grid2" style="margin-top:12px">
+        <button id="saveBtn" class="btn btnPrimary" type="button">Save campaign</button>
+        <button id="copyBtn" class="btn btnGhost" type="button">Copy public link</button>
+      </div>
+
+      <div style="height:10px"></div>
+      <button id="deleteBtn" class="btn btnDanger" type="button">Delete campaign</button>
+
+      <div id="publicLinkBox" class="linkBox"></div>
+
+      <p class="tiny">How to get your Stripe link: Stripe Dashboard → <b>Payment Links</b> → <b>New</b> → create → copy the Payment Link URL and paste it above.</p>
+    </div>
+
+    <!-- PUBLIC PAGE -->
+    <div id="publicWrap">
+      <h2 id="pTitle" class="publicTitle"></h2>
+      <p id="pAbout" class="publicAbout"></p>
+
+      <div class="box">
+        <div class="boxTitle">Donate</div>
+        <p class="sub" style="margin:0 0 12px">Tap the button to donate securely.</p>
+        <button id="donateBtn" class="btn btnGreen" type="button">Donate</button>
+        <div class="tiny">Payments are processed by Stripe (secure checkout).</div>
+      </div>
+
+      <div class="center" style="margin-top:14px">
+        <button id="backHomeBtn" class="btn btnGhost" type="button">Back</button>
+      </div>
+    </div>
+
+    <div class="tiny center" id="buildTag"></div>
+  </div>
+</div>
+
+<script>(function(){if(window.__donateBooted)return;window.__donateBooted=1;var sb=document.getElementById("statusBox");function setMsg(t,type){if(!sb)return;sb.textContent=t||"";sb.style.display=t?"block":"none";sb.dataset.type=type||"info"}window.addEventListener("error",function(e){setMsg("JS ERROR:\n"+(e.message||e.error||e),"err")});window.addEventListener("unhandledrejection",function(e){var r=e&&e.reason;setMsg("PROMISE ERROR:\n"+((r&&r.message)?r.message:String(r)),"err")});})();</script>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,setPersistence,browserLocalPersistence,sendEmailVerification}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc,deleteDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* Firebase config */
+const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+try{setPersistence(auth,browserLocalPersistence)}catch(_){}
+
+/* elements */
+const el=id=>document.getElementById(id);
+const headerTitle=el("headerTitle"),headerSub=el("headerSub"),statusBox=el("statusBox"),bootCover=el("bootCover");
+const loginWrap=el("loginWrap"),verifyWrap=el("verifyWrap"),editorWrap=el("editorWrap"),publicWrap=el("publicWrap");
+const emailEl=el("email"),passEl=el("password");
+const loginBtn=el("loginBtn"),createBtn=el("createBtn"),forgotBtn=el("forgotBtn");
+const logoutBtn=el("logoutBtn"),switchUserBtn=el("switchUserBtn");
+const resendBtn=el("resendBtn"),checkVerifiedBtn=el("checkVerifiedBtn");
 const campTitle=el("campTitle"),campAbout=el("campAbout"),campStripe=el("campStripe");
+const saveBtn=el("saveBtn"),copyBtn=el("copyBtn"),deleteBtn=el("deleteBtn"),publicLinkBox=el("publicLinkBox");
+const pTitle=el("pTitle"),pAbout=el("pAbout"),donateBtn=el("donateBtn"),backHomeBtn=el("backHomeBtn");
+const buildTag=el("buildTag");
+
 buildTag.textContent="build: "+new Date().toISOString().slice(0,16).replace("T"," ");
-const authErr=(e)=>{const c=(e&&e.code)||"";if(c.includes("invalid-credential")||c.includes("user-not-found")||c.includes("wrong-password"))return"That account doesn’t exist (or password is wrong).\nTap “Create account” if you’re new.";if(c.includes("email-already-in-use"))return"That email already has an account.\nTap “Login” instead.";if(c.includes("too-many-requests"))return"Too many attempts. Wait a bit and try again.";if(c.includes("invalid-email"))return"That email address looks wrong.";if(c.includes("weak-password"))return"Password is too weak (use 6+ characters).";return(e&&e.message)||"Something went wrong.";};
-const cleanEmail=()=>String(emailEl?.value||"").trim();const cleanPass=()=>String(passEl?.value||"");
-const ACCESS_DOC=(uid)=>doc(db,"users",uid,"access","status");const CAMPAIGN_DOC=(uid)=>doc(db,"campaigns",uid);
-const showHead=(mode)=>{if(mode==="public"){show(headSignedOut,false);show(headSignedIn,false);show(headPublic,true);}else if(mode==="signedin"){show(headSignedOut,false);show(headPublic,false);show(headSignedIn,true);}else{show(headPublic,false);show(headSignedIn,false);show(headSignedOut,true);}};
-const resetUI=()=>{setMsg("", "info");show(bootCover,true);show(publicWrap,false);show(privateWrap,false);show(authWrap,false);show(verifyWrap,false);show(payWrap,false);show(editorWrap,false);logoutBtn.style.display="none";switchUserBtn.style.display="none";if(whoami)whoami.textContent="";};
-resetUI();
-const q=qs();const campaignId=q.get("c");
-if(campaignId){try{showHead("public");show(bootCover,true);show(privateWrap,false);show(publicWrap,false);const snap=await getDoc(CAMPAIGN_DOC(campaignId));show(bootCover,false);show(publicWrap,true);const pubAbout=el("pubAbout"),donateLink=el("donateLink"),pubTiny=el("pubTiny"),pubFootLeft=el("pubFootLeft"),pubFootRight=el("pubFootRight");pubFootRight.textContent="";pubFootLeft.textContent="";if(!snap.exists()){if(headPublicTitle)headPublicTitle.textContent="Campaign not found";pubAbout.textContent="This campaign link is invalid or hasn’t been created yet.";donateLink.textContent="Back to home";donateLink.href=basePath();donateLink.target="_self";pubTiny.textContent="";}else{const d=snap.data()||{};const t=d.title||"Campaign";if(headPublicTitle)headPublicTitle.textContent=t;pubAbout.textContent=d.about||"";const link=String(d.stripeLink||"").trim();if(link&&/^https:\/\/(buy|donate)\.stripe\.com\//i.test(link)){donateLink.textContent="Donate";donateLink.href=link;donateLink.target="_blank";pubTiny.textContent="Payments are processed by Stripe (secure checkout).";}else{donateLink.textContent="Donation link not set";donateLink.href=basePath();donateLink.target="_self";pubTiny.textContent="The campaign owner hasn’t added a Stripe Payment Link yet.";}}}catch(e){show(bootCover,false);show(publicWrap,true);showHead("public");if(headPublicTitle)headPublicTitle.textContent="Error";el("pubAbout").textContent="Couldn’t load this page.\n"+(e?.message||e);el("donateLink").textContent="Back to home";el("donateLink").href=basePath();el("donateLink").target="_self";el("pubTiny").textContent="";}}else{showHead("signedout");show(privateWrap,true);show(bootCover,true);show(publicWrap,false);
-logoutBtn.addEventListener("click",async()=>{try{await signOut(auth)}catch(_){ }location.href=basePath();});
-switchUserBtn.addEventListener("click",async()=>{try{await signOut(auth)}catch(_){ }if(emailEl)emailEl.value="";if(passEl)passEl.value="";setMsg("Ready for a different account.","ok");showHead("signedout");show(authWrap,true);show(verifyWrap,false);show(payWrap,true);show(editorWrap,false);logoutBtn.style.display="none";switchUserBtn.style.display="none";});
-loginBtn.addEventListener("click",async()=>{try{disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Signing in…","info");await signInWithEmailAndPassword(auth,cleanEmail(),cleanPass());}catch(e){setMsg(authErr(e),"err");}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);}});
-createBtn.addEventListener("click",async()=>{try{disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Creating account…","info");const cred=await createUserWithEmailAndPassword(auth,cleanEmail(),cleanPass());try{await sendEmailVerification(cred.user)}catch(_){ }setMsg("Account created ✅\nNow check your email and tap the verification link.\nThen come back and tap “I’ve verified”.","ok");}catch(e){setMsg(authErr(e),"err");}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);}});
-forgotBtn.addEventListener("click",async()=>{try{const em=cleanEmail();if(!em){setMsg("Enter your email first.","warn");return;}disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);setMsg("Sending reset email…","info");await sendPasswordResetEmail(auth,em);setMsg("Password reset email sent ✅","ok");}catch(e){setMsg(authErr(e),"err");}finally{disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);}});
-resendVerifyBtn.addEventListener("click",async()=>{try{const u=auth.currentUser;if(!u){setMsg("Please login first.","warn");return;}disable(resendVerifyBtn,true);setMsg("Resending verification email…","info");await sendEmailVerification(u);setMsg("Verification email sent ✅","ok");}catch(e){setMsg((e&&e.message)||"Couldn’t resend email.","err");}finally{disable(resendVerifyBtn,false);}});
-refreshVerifyBtn.addEventListener("click",async()=>{try{const u=auth.currentUser;if(!u){setMsg("Please login again.","warn");return;}disable(refreshVerifyBtn,true);setMsg("Checking…","info");await u.reload();if(u.emailVerified){setMsg("Email verified ✅","ok");}else{setMsg("Still not verified.\nOpen the email and tap the link, then try again.","warn");}}catch(e){setMsg((e&&e.message)||"Couldn’t refresh.","err");}finally{disable(refreshVerifyBtn,false);}});
-payBtn.addEventListener("click",async()=>{try{const u=auth.currentUser;if(!u){setMsg("Please log in first, then pay.","warn");return;}if(!u.emailVerified){setMsg("Please verify your email first.","warn");return;}disable(payBtn,true);setMsg("Opening checkout…","info");const idToken=await u.getIdToken(true);const clean=basePath();const successUrl=clean+"?success=1";const cancelUrl=clean;const res=await fetch(CREATE_CHECKOUT_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},body:JSON.stringify({idToken,successUrl,cancelUrl})});if([301,302,303,307,308].includes(res.status)){const loc=res.headers.get("Location");if(loc){location.href=loc;return;}}const raw=await res.text().catch(()=> "");if(!res.ok)throw new Error("Checkout error ("+res.status+"):\n"+(raw||"(no response body)"));let data=null;try{data=JSON.parse(raw||"{}")}catch(_){throw new Error("Checkout returned invalid JSON:\n"+raw)}const url=data?.url||data?.checkoutUrl||data?.checkout_url||data?.sessionUrl||data?.redirectUrl||null;if(!url)throw new Error("No checkout URL returned.\nResponse was:\n"+JSON.stringify(data,null,2));location.href=url}catch(e){setMsg((e&&e.message)||"Failed to start checkout.","err")}finally{disable(payBtn,false);}});
-saveBtn.addEventListener("click",async()=>{try{const u=auth.currentUser;if(!u){setMsg("Please login first.","warn");return;}if(!u.emailVerified){setMsg("Verify your email first.","warn");return;}disable(saveBtn,true);setMsg("Saving…","info");const t=String(campTitle.value||"").trim();const a=String(campAbout.value||"").trim();const s=String(campStripe.value||"").trim();if(!t||t.length<2){setMsg("Please enter a campaign title.","warn");return;}if(!a||a.length<5){setMsg("Please write a short ‘About’ message.","warn");return;}if(!/^https:\/\/(buy|donate)\.stripe\.com\//i.test(s)){setMsg("Paste a valid Stripe Payment Link URL.\nIt should start with:\nhttps://buy.stripe.com/","warn");return;}await setDoc(CAMPAIGN_DOC(u.uid),{title:t,about:a,stripeLink:s,ownerUid:u.uid,updatedAt:serverTimestamp()},{merge:true});setMsg("Saved ✅","ok");}catch(e){setMsg((e&&e.message)||"Save failed.","err");}finally{disable(saveBtn,false);}});
-copyBtn.addEventListener("click",async()=>{try{const u=auth.currentUser;if(!u){setMsg("Please login first.","warn");return;}const link=basePath()+"?c="+encodeURIComponent(u.uid);if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(link);}else{const ta=document.createElement("textarea");ta.value=link;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);}setMsg("Public link copied ✅","ok");}catch(e){setMsg("Couldn’t copy. Tap and hold the link to copy it.","warn");}});
-const fillPublicLink=(uid)=>{publicLinkBox.textContent=basePath()+"?c="+encodeURIComponent(uid);};
-const loadCampaignToForm=async(uid)=>{try{const snap=await getDoc(CAMPAIGN_DOC(uid));if(snap.exists()){const d=snap.data()||{};campTitle.value=d.title||"";campAbout.value=d.about||"";campStripe.value=d.stripeLink||"";}}catch(_){ }};
-onAuthStateChanged(auth,async(user)=>{try{show(publicWrap,false);show(privateWrap,true);if(!user){show(bootCover,false);showHead("signedout");show(authWrap,true);show(verifyWrap,false);show(payWrap,true);show(editorWrap,false);logoutBtn.style.display="none";switchUserBtn.style.display="none";if(whoami)whoami.textContent="";if(qs().has("success"))setMsg("Payment received ✅\nNow login to unlock.","ok");else setMsg("Not logged in.","ok");return;}
-logoutBtn.style.display="inline-block";switchUserBtn.style.display="inline-block";if(whoami)whoami.textContent=user.email||"";show(bootCover,false);show(authWrap,false);fillPublicLink(user.uid);await loadCampaignToForm(user.uid);
-if(!user.emailVerified){showHead("signedin");show(verifyWrap,true);show(payWrap,false);show(editorWrap,false);setMsg("Please verify your email to continue.","warn");return;}
-showHead("signedin");show(verifyWrap,false);setMsg("Checking access…","info");
-const snap=await getDoc(doc(db,"users",user.uid,"access","status"));const paid=!!(snap.exists()&&snap.data()&&snap.data().paid===true);
-if(!paid){show(payWrap,true);show(editorWrap,false);setMsg("You’re logged in, but you haven’t paid yet.","warn");if(qs().has("success"))setMsg("Payment received ✅\nIf it still shows unpaid, tap Logout then login again.","ok");return;}
-show(payWrap,false);show(editorWrap,true);setMsg("Access granted ✅","ok");if(qs().has("success"))setMsg("Payment received ✅","ok");
-}catch(e){show(bootCover,false);showHead(user?"signedin":"signedout");show(authWrap,true);show(payWrap,true);show(editorWrap,false);logoutBtn.style.display=user?"inline-block":"none";switchUserBtn.style.display=user?"inline-block":"none";setMsg("Something went wrong:\n"+(e?.message||e),"err");}});
-}</script></body></html>
+
+/* helpers */
+const show=(n,on)=>{if(n)n.style.display=on?"block":"none"};
+const setMsg=(t,type="info")=>{statusBox.textContent=t||"";statusBox.style.display=t?"block":"none";statusBox.dataset.type=type};
+const disable=(b,on)=>{if(!b)return;b.disabled=!!on;b.style.opacity=on?".7":"1";b.style.cursor=on?"not-allowed":"pointer"};
+const safeEmail=()=>String(emailEl.value||"").trim();
+const safePass=()=>String(passEl.value||"");
+
+const qs=new URLSearchParams(location.search);
+const campaignId=qs.get("c"); // public mode if present
+
+function setHeader(mode){
+  if(mode==="login"){headerTitle.textContent="Sign in";headerSub.textContent="Create or sign in to manage your campaign.";}
+  if(mode==="verify"){headerTitle.textContent="Verify email";headerSub.textContent="Please verify your email to continue.";}
+  if(mode==="editor"){headerTitle.textContent="Your campaign";headerSub.textContent="Edit your campaign and share your public link.";}
+  if(mode==="public"){headerTitle.textContent="";headerSub.textContent="";} // hidden-ish
+  headerTitle.style.display=(mode==="public")?"none":"block";
+  headerSub.style.display=(mode==="public")?"none":"block";
+}
+
+function setMode(mode){
+  show(bootCover,false);
+  show(loginWrap,mode==="login");
+  show(verifyWrap,mode==="verify");
+  show(editorWrap,mode==="editor");
+  show(publicWrap,mode==="public");
+  show(logoutBtn,mode==="editor"||mode==="verify");
+  show(switchUserBtn,mode==="editor"||mode==="verify");
+  setHeader(mode);
+}
+
+function campaignRef(uid){return doc(db,"campaigns",uid);}
+
+function publicUrlFor(uid){
+  const base=location.origin+location.pathname; // /donate-site/ or /donate-site/index.html
+  return base+(base.includes("?")?"&":"?")+"c="+encodeURIComponent(uid);
+}
+
+/* PUBLIC MODE (no auth required) */
+async function loadPublic(){
+  setMode("public");
+  setMsg("", "info");
+  const id=campaignId;
+  if(!id){setMsg("Missing campaign id.","err");return;}
+  try{
+    const snap=await getDoc(campaignRef(id));
+    if(!snap.exists()){setMsg("This campaign was not found.","err");pTitle.textContent="Campaign not found";pAbout.textContent="";donateBtn.style.display="none";return;}
+    const d=snap.data()||{};
+    pTitle.textContent=(d.title||"Campaign").trim();
+    pAbout.textContent=(d.about||"").trim();
+    const link=(d.stripe||"").trim();
+    if(!link){donateBtn.style.display="none";setMsg("This campaign has no donation link yet.","warn");}
+    else{donateBtn.style.display="block";donateBtn.onclick=()=>{location.href=link;};}
+  }catch(err){
+    setMsg("Failed to load campaign.\n"+(err?.message||err),"err");
+  }
+}
+
+/* AUTH UI */
+async function loadEditor(user){
+  setMode("editor");
+  setMsg("", "info");
+  try{
+    const uid=user.uid;
+    publicLinkBox.textContent=publicUrlFor(uid);
+    const snap=await getDoc(campaignRef(uid));
+    const d=snap.exists()?snap.data():{};
+    campTitle.value=(d?.title||"");
+    campAbout.value=(d?.about||"");
+    campStripe.value=(d?.stripe||"");
+  }catch(err){
+    setMsg("Couldn’t load your campaign.\n"+(err?.message||err),"err");
+  }
+}
+
+/* actions */
+loginBtn.addEventListener("click",async()=>{
+  try{
+    disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);
+    setMsg("Signing in…","ok");
+    await signInWithEmailAndPassword(auth,safeEmail(),safePass());
+  }catch(err){
+    const code=String(err?.code||"");
+    if(code.includes("auth/invalid-credential")||code.includes("auth/user-not-found")||code.includes("auth/wrong-password")){
+      setMsg("Account not found or wrong password.\nIf you’re new, tap “Create account”.","err");
+    }else setMsg(err?.message||"Login failed.","err");
+  }finally{
+    disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);
+  }
+});
+
+createBtn.addEventListener("click",async()=>{
+  try{
+    disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);
+    setMsg("Creating account…","ok");
+    const cred=await createUserWithEmailAndPassword(auth,safeEmail(),safePass());
+    try{await sendEmailVerification(cred.user);}catch(_){}
+    setMsg("Account created ✅\nWe sent a verification email. Please verify, then tap “I verified — Continue”.","ok");
+  }catch(err){
+    const code=String(err?.code||"");
+    if(code.includes("auth/email-already-in-use")){
+      setMsg("That email already has an account.\nTap “Login” instead.","err");
+    }else setMsg(err?.message||"Create account failed.","err");
+  }finally{
+    disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);
+  }
+});
+
+forgotBtn.addEventListener("click",async()=>{
+  try{
+    const em=safeEmail();
+    if(!em){setMsg("Enter your email first.","warn");return;}
+    disable(loginBtn,true);disable(createBtn,true);disable(forgotBtn,true);
+    setMsg("Sending reset email…","ok");
+    await sendPasswordResetEmail(auth,em);
+    setMsg("Password reset email sent ✅","ok");
+  }catch(err){
+    setMsg(err?.message||"Reset failed.","err");
+  }finally{
+    disable(loginBtn,false);disable(createBtn,false);disable(forgotBtn,false);
+  }
+});
+
+logoutBtn.addEventListener("click",async()=>{try{await signOut(auth);}catch(_){ }});
+switchUserBtn.addEventListener("click",async()=>{try{await signOut(auth);}catch(_){ } emailEl.value="";passEl.value=""; setMsg("Ready for a different account.","ok");});
+
+resendBtn.addEventListener("click",async()=>{
+  try{
+    const u=auth.currentUser;
+    if(!u){setMsg("Not logged in.","err");return;}
+    await sendEmailVerification(u);
+    setMsg("Verification email re-sent ✅","ok");
+  }catch(err){
+    setMsg(err?.message||"Could not resend.","err");
+  }
+});
+
+checkVerifiedBtn.addEventListener("click",async()=>{
+  try{
+    const u=auth.currentUser;
+    if(!u){setMsg("Not logged in.","err");return;}
+    await u.reload();
+    if(u.emailVerified){setMsg("Verified ✅ Loading your campaign…","ok");await loadEditor(u);}
+    else setMsg("Still not verified.\nOpen the email and tap the verification link, then try again.","warn");
+  }catch(err){
+    setMsg(err?.message||"Could not check verification.","err");
+  }
+});
+
+/* save / copy / delete */
+saveBtn.addEventListener("click",async()=>{
+  try{
+    const u=auth.currentUser;
+    if(!u){setMsg("Not logged in.","err");return;}
+    disable(saveBtn,true);disable(copyBtn,true);disable(deleteBtn,true);
+    setMsg("Saving…","ok");
+    await setDoc(campaignRef(u.uid),{
+      title:String(campTitle.value||"").trim(),
+      about:String(campAbout.value||"").trim(),
+      stripe:String(campStripe.value||"").trim(),
+      updatedAt:Date.now()
+    },{merge:true});
+    setMsg("Saved ✅","ok");
+  }catch(err){
+    setMsg("Save failed.\n"+(err?.message||err),"err");
+  }finally{
+    disable(saveBtn,false);disable(copyBtn,false);disable(deleteBtn,false);
+  }
+});
+
+copyBtn.addEventListener("click",async()=>{
+  try{
+    const u=auth.currentUser;
+    if(!u){setMsg("Not logged in.","err");return;}
+    const url=publicUrlFor(u.uid);
+    await navigator.clipboard.writeText(url);
+    setMsg("Public link copied ✅","ok");
+  }catch(_){
+    setMsg("Could not copy automatically.\nTap and hold the link to copy it.","warn");
+  }
+});
+
+deleteBtn.addEventListener("click",async()=>{
+  try{
+    const u=auth.currentUser;
+    if(!u){setMsg("Not logged in.","err");return;}
+    if(!confirm("Delete your campaign? This removes the public page content."))return;
+    disable(saveBtn,true);disable(copyBtn,true);disable(deleteBtn,true);
+    setMsg("Deleting…","ok");
+    await deleteDoc(campaignRef(u.uid));
+    campTitle.value="";campAbout.value="";campStripe.value="";
+    setMsg("Deleted ✅ (your public page will show ‘not found’)","ok");
+  }catch(err){
+    setMsg("Delete failed.\n"+(err?.message||err),"err");
+  }finally{
+    disable(saveBtn,false);disable(copyBtn,false);disable(deleteBtn,false);
+  }
+});
+
+/* public back button */
+backHomeBtn.addEventListener("click",()=>{location.href=location.origin+location.pathname;});
+
+/* boot */
+setMsg("", "info");
+if(campaignId){ // public view always wins
+  setMode("public");
+  show(bootCover,true);
+  loadPublic();
+}else{
+  setMode("login");
+  show(bootCover,true);
+}
+
+/* auth state */
+onAuthStateChanged(auth,async(user)=>{
+  if(campaignId)return; // ignore auth changes in public mode
+  try{
+    if(!user){
+      setMode("login");
+      setMsg("", "info");
+      return;
+    }
+    await user.reload();
+    if(!user.emailVerified){
+      setMode("verify");
+      setMsg("Please verify your email to continue.","warn");
+      return;
+    }
+    await loadEditor(user);
+  }catch(err){
+    setMode("login");
+    setMsg("Startup error:\n"+(err?.message||err),"err");
+  }
+});
+</script>
+</body>
+</html>
