@@ -1,45 +1,44 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Success</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center} .wrap{width:min(520px,92vw);text-align:center;padding:28px 18px} h1{margin:0 0 10px;font-size:42px} p{margin:10px 0;color:#333} a{color:#111;text-decoration:underline} .big{font-size:18px} .muted{color:#666} .ok{font-size:44px;line-height:1}</style></head><body><div class="wrap"><div class="ok">✅</div><h1>Payment received</h1><p class="big">Unlocking your account...</p><p id="status" class="muted">Waiting for confirmation... (0/12)</p><p><a id="backLink" href="login.html">Back to login</a></p></div><script type="module">
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Success</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center}.wrap{width:min(520px,92vw);text-align:center;padding:28px 18px}h1{margin:0 0 10px;font-size:42px}p{margin:10px 0;color:#333}.muted{color:#666}a{color:#111;text-decoration:underline}.ok{font-size:44px;line-height:1}</style></head><body><div class="wrap"><div class="ok">✅</div><h1>Payment received</h1><p>Unlocking your account...</p><p id="status" class="muted">Loading…</p><p><a id="back" href="login.html">Back to login</a></p></div><script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import{getAuth,setPersistence,browserLocalPersistence,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-const firebaseConfig=window.firebaseConfig||{apiKey:"PASTE_YOUR_API_KEY",authDomain:"PASTE_YOUR_AUTH_DOMAIN",projectId:"PASTE_YOUR_PROJECT_ID",storageBucket:"PASTE_YOUR_STORAGE_BUCKET",messagingSenderId:"PASTE_YOUR_SENDER_ID",appId:"PASTE_YOUR_APP_ID"};
+const firebaseConfig={apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",authDomain:"donate-app-ff07c.firebaseapp.com",projectId:"donate-app-ff07c",storageBucket:"donate-app-ff07c.firebasestorage.app",messagingSenderId:"950201336557",appId:"1:950201336557:web:e8bdfa02d99512051f82e4"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const statusEl=document.getElementById("status");
 const url=new URL(location.href);
-const sessionId=url.searchParams.get("session_id"); // not required for paid-check, but useful to confirm we came from Stripe
-if(!sessionId){/*still allow check*/}
+const sessionId=url.searchParams.get("session_id")||"";
+
+// Always store session_id so login.html can do the unlock loop after you return
+if(sessionId)localStorage.setItem("pending_session_id",sessionId);
 
 const sleep=t=>new Promise(r=>setTimeout(r,t));
+await setPersistence(auth,browserLocalPersistence);
+
+async function isPaid(uid){
+  const snap=await getDoc(doc(db,"users",uid));
+  return snap.exists()&&snap.data()?.paid===true;
+}
 
 onAuthStateChanged(auth,async(u)=>{
-  if(!u){statusEl.textContent="Not logged in. Please go back to login.";return;}
-  const userRef=doc(db,"users",u.uid);
-  let attempts=0,maxAttempts=12;
-
-  // small initial delay so webhook has a moment to write
-  await sleep(800);
-
-  const tick=async()=>{
-    attempts++;
-    statusEl.textContent=`Waiting for confirmation... (${attempts}/${maxAttempts})`;
+  if(!u){
+    statusEl.textContent="Not logged in. Sending you back to login…";
+    // Go back to login with session_id so it checks + redirects after auth
+    setTimeout(()=>{location.replace("login.html"+(sessionId?("?session_id="+encodeURIComponent(sessionId)):""));},800);
+    return;
+  }
+  for(let i=1;i<=12;i++){
+    statusEl.textContent=`Waiting for confirmation… (${i}/12)`;
     try{
-      const snap=await getDoc(userRef);
-      if(snap.exists() && snap.data()?.paid===true){
+      if(await isPaid(u.uid)){
+        localStorage.removeItem("pending_session_id");
         statusEl.textContent="Confirmed! Redirecting…";
         location.replace("app.html");
         return;
       }
-    }catch(e){
-      // If Firestore temporarily fails, keep trying (don’t instantly give up)
-      console.warn("Paid-check failed:",e);
-    }
-    if(attempts>=maxAttempts){
-      statusEl.textContent="Still not confirmed. Go back to login and tap Pay again if needed.";
-      return;
-    }
-    setTimeout(tick,1500);
-  };
-  tick();
+    }catch(e){}
+    await sleep(1200);
+  }
+  statusEl.textContent="Still not confirmed. Go back to login and tap Pay again if needed.";
 });
 </script></body></html>
