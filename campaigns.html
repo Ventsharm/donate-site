@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Campaigns</title>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f3f6ff}
+.wrap{padding:20px}
+.header{
+background:linear-gradient(135deg,#6d4fe8,#b697ff);
+color:#fff;
+padding:30px 20px;
+border-radius:24px;
+font-size:28px;
+font-weight:900;
+text-align:center;
+margin-bottom:16px
+}
+.item{
+display:block;
+background:linear-gradient(135deg,#6d4fe8,#b697ff);
+color:#fff;
+text-decoration:none;
+padding:16px;
+border-radius:20px;
+margin:10px 0;
+font-weight:900;
+box-shadow:0 10px 25px rgba(0,0,0,.15)
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<div class="header">Campaigns ✓</div>
+
+<div id="list"></div>
+
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import{getFirestore,collection,getDocs}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const app=initializeApp({
+apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",
+authDomain:"donate-app-ff07c.firebaseapp.com",
+projectId:"donate-app-ff07c"
+});
+
+const db=getFirestore(app);
+
+const list=document.getElementById("list");
+
+const base=location.origin+"/donate-site/";
+
+async function load(){
+const snap=await getDocs(collection(db,"campaigns"));
+
+snap.forEach(doc=>{
+const d=doc.data();
+if(!d.title)return;
+
+const a=document.createElement("a");
+a.className="item";
+a.textContent=d.title;
+a.href=base+"?c="+doc.id;
+
+list.appendChild(a);
+});
+}
+
+load();
+</script>
+
+</body>
+</html>
