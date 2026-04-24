@@ -1,4 +1,4 @@
-const CACHE_NAME = "ventsharm-donate-v1";
+const CACHE_NAME = "giftme-cache-v2";
 const OFFLINE_URL = "/donate-site/";
 
 self.addEventListener("install", e => {
