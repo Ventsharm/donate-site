@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GiftMe</title>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f3f6ff}
+.wrap{padding:20px}
+.header{background:linear-gradient(135deg,#6d4fe8,#b697ff);color:#fff;padding:30px;border-radius:24px;margin-bottom:16px;text-align:center;font-size:28px;font-weight:900}
+.card{background:#fff;border-radius:24px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.1)}
+.btn{width:100%;padding:14px;border-radius:16px;border:0;font-weight:900;margin-top:10px;cursor:pointer}
+.btnPrimary{background:#000;color:#fff}
+.btnGhost{background:#eef1f6}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<div class="header">GiftMe</div>
+
+<div id="loginWrap" class="card">
+<h2>Sign in</h2>
+<input id="email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #ccc">
+<input id="password" type="password" placeholder="Password" style="width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #ccc">
+<button id="loginBtn" class="btn btnPrimary">Login</button>
+</div>
+
+<div id="editorWrap" class="card" style="display:none">
+<h2>Your campaign</h2>
+
+<input id="title" placeholder="Campaign title" style="width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #ccc">
+
+<textarea id="about" placeholder="About your campaign" style="width:100%;padding:12px;border-radius:12px;border:1px solid #ccc"></textarea>
+
+<button id="saveBtn" class="btn btnPrimary">Save campaign</button>
+
+<button id="viewAllCampaignsBtn" class="btn btnGhost">View all campaigns</button>
+
+</div>
+
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import{getAuth,signInWithEmailAndPassword,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import{getFirestore,doc,setDoc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const app=initializeApp({
+apiKey:"AIzaSyBMZo5HOStyDEINl2xLm-M9X4PaDc-raBQ",
+authDomain:"donate-app-ff07c.firebaseapp.com",
+projectId:"donate-app-ff07c"
+});
+
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const loginWrap=document.getElementById("loginWrap");
+const editorWrap=document.getElementById("editorWrap");
+
+document.getElementById("loginBtn").onclick=async()=>{
+await signInWithEmailAndPassword(auth,
+document.getElementById("email").value,
+document.getElementById("password").value
+);
+};
+
+onAuthStateChanged(auth,async user=>{
+if(user){
+loginWrap.style.display="none";
+editorWrap.style.display="block";
+
+const snap=await getDoc(doc(db,"campaigns",user.uid));
+if(snap.exists()){
+const d=snap.data();
+document.getElementById("title").value=d.title||"";
+document.getElementById("about").value=d.about||"";
+}
+}else{
+loginWrap.style.display="block";
+editorWrap.style.display="none";
+}
+});
+
+document.getElementById("saveBtn").onclick=async()=>{
+const user=auth.currentUser;
+await setDoc(doc(db,"campaigns",user.uid),{
+title:document.getElementById("title").value,
+about:document.getElementById("about").value
+},{merge:true});
+alert("Saved ✅");
+};
+
+document.getElementById("viewAllCampaignsBtn").onclick=()=>{
+location.href=location.origin+"/donate-site/campaigns.html";
+};
+</script>
+
+</body>
+</html>
