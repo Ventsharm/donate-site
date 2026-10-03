@@ -3,6 +3,8 @@
   const demo=location.pathname==='/donate-site/budget-demo.html';
   const endpoint='https://europe-west2-donate-app-ff07c.cloudfunctions.net/'+(demo?'giftmeMaintenanceDemoStatus':'giftmeMaintenanceStatus');
   let booted=false,checking=false;
+  let maintenanceHint=0;
+  try{maintenanceHint=Number(sessionStorage.getItem('giftme-maintenance-until')||0);}catch(_){}
   const style=document.createElement('style');
   style.textContent=`html[data-giftme-gate] body>*:not(#giftmeMaintenance){visibility:hidden!important}#giftmeMaintenance{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top,#fff5e9,#faf8f5 65%,#fff);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#352a24;visibility:visible!important}.gm-card{width:min(420px,100%);padding:38px 28px;text-align:center;border-radius:30px;background:#fff;border:1px solid #fff5e6;box-shadow:0 22px 65px #a76d2521}.gm-ring-wrap{position:relative;width:92px;height:92px;margin:0 auto 25px}.gm-glow{position:absolute;inset:8px;border-radius:50%;background:#ffac4770;filter:blur(18px);animation:gm-pulse 1.8s ease-in-out infinite}.gm-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#f59e0b,#ffe0a3,#fb923c,#f59e0b);animation:gm-spin 1.6s linear infinite}.gm-ring:before{content:'';position:absolute;inset:8px;border-radius:50%;background:white}.gm-sparkle{position:absolute;inset:0;display:grid;place-items:center;font-size:32px;color:#ef8a16;animation:gm-pulse 1.8s ease-in-out infinite}.gm-card h1{font-size:23px;line-height:1.25;margin:0 0 12px;font-weight:800}.gm-card p{font-size:15px;line-height:1.65;margin:0;color:#786d61}.gm-card strong{display:block;margin-top:6px}@keyframes gm-spin{to{transform:rotate(360deg)}}@keyframes gm-pulse{50%{transform:scale(1.09);opacity:.7}}@media(prefers-reduced-motion:reduce){.gm-ring,.gm-glow,.gm-sparkle{animation:none}}`;
   document.head.append(style);
@@ -50,7 +52,7 @@
       if(!response.ok) throw new Error('Status unavailable');
       const status=await response.json();
       if(typeof status.maintenance!=='boolean') throw new Error('Invalid status');
-      if(status.maintenance) {
+      if(status.maintenance || Date.now()<maintenanceHint) {
         showMaintenance();
         // Reload stops listeners and in-flight application code. On the new
         // document only the maintenance checker runs until reopening.
@@ -61,8 +63,16 @@
       if(booted) location.reload();
     } finally {checking=false;}
   }
+  if(Date.now()<maintenanceHint) showMaintenance();
   check();
   setInterval(check,60000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden) check();});
   window.addEventListener('online',check);
+  window.addEventListener('giftme-maintenance',()=>{
+    // A data endpoint may close the guard before the status cache catches up.
+    // Hold the next page closed for one poll interval to avoid reload loops.
+    try{sessionStorage.setItem('giftme-maintenance-until',String(Date.now()+60000));}catch(_){}
+    showMaintenance();
+    if(booted) location.reload();
+  });
 })();

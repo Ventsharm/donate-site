@@ -1,4 +1,4 @@
-const CACHE_NAME = "giftme-cache-v4-maintenance";
+const CACHE_NAME = "giftme-cache-v5-maintenance";
 const OFFLINE_URL = "/donate-site/";
 
 self.addEventListener("install", e => {
