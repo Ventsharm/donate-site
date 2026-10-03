@@ -9,9 +9,11 @@
   const overlay=document.createElement('main');
   overlay.id='giftmeMaintenance';
   overlay.setAttribute('role','status');
-  function show(closed) {
-    document.documentElement.dataset.giftmeGate=closed?'maintenance':'checking';
-    overlay.innerHTML='<div class="gm-card"><div class="gm-ring-wrap" aria-hidden="true"><div class="gm-glow"></div><div class="gm-ring"></div><div class="gm-sparkle">✦</div></div><h1>'+(closed?'GiftMe is taking a little break 🧡':'Opening GiftMe…')+'</h1><p>'+(closed?'We’re currently carrying out some maintenance.<strong>GiftMe will be back online soon.</strong>':'Getting everything ready…')+'</p></div>';
+  // Keep the site's existing loader visible while its scripts wait for status.
+  style.textContent+='html[data-giftme-gate="checking"] body #vsAppGuard,html[data-giftme-gate="checking"] body #giftmePageLoader{visibility:visible!important}';
+  function showMaintenance() {
+    document.documentElement.dataset.giftmeGate='maintenance';
+    overlay.innerHTML='<div class="gm-card"><div class="gm-ring-wrap" aria-hidden="true"><div class="gm-glow"></div><div class="gm-ring"></div><div class="gm-sparkle">✦</div></div><h1>GiftMe is taking a little break 🧡</h1><p>We’re currently carrying out some maintenance.<strong>GiftMe will be back online soon.</strong></p></div>';
     if(!overlay.isConnected) document.body.append(overlay);
   }
   async function boot() {
@@ -49,17 +51,16 @@
       const status=await response.json();
       if(typeof status.maintenance!=='boolean') throw new Error('Invalid status');
       if(status.maintenance) {
-        show(true);
+        showMaintenance();
         // Reload stops listeners and in-flight application code. On the new
         // document only the maintenance checker runs until reopening.
         if(booted) location.reload();
       } else if(!booted) await boot();
     } catch (_) {
-      show(true);
+      showMaintenance();
       if(booted) location.reload();
     } finally {checking=false;}
   }
-  show(false);
   check();
   setInterval(check,60000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden) check();});
