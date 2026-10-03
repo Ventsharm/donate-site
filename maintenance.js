@@ -1,7 +1,6 @@
 (() => {
   'use strict';
-  const demo=location.pathname==='/donate-site/budget-demo.html';
-  const endpoint='https://europe-west2-donate-app-ff07c.cloudfunctions.net/'+(demo?'giftmeMaintenanceDemoStatus':'giftmeMaintenanceStatus');
+  const endpoint='https://europe-west2-donate-app-ff07c.cloudfunctions.net/giftmeMaintenanceStatus';
   let booted=false,checking=false;
   let maintenanceHint=0;
   try{maintenanceHint=Number(sessionStorage.getItem('giftme-maintenance-until')||0);}catch(_){}
