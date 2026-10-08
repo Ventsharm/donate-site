@@ -1,6 +1,19 @@
 (() => {
   'use strict';
   const endpoint='https://europe-west2-donate-app-ff07c.cloudfunctions.net/giftmeMaintenanceStatus';
+  // Fetch static app modules while status is checked, without executing them.
+  for(const href of ['https://www.gstatic.com','https://europe-west2-donate-app-ff07c.cloudfunctions.net','https://identitytoolkit.googleapis.com','https://securetoken.googleapis.com']) {
+    const link=document.createElement('link');link.rel='preconnect';link.href=href;link.crossOrigin='anonymous';document.head.append(link);
+  }
+  const modules=new Set();
+  for(const script of document.querySelectorAll('script[type="application/giftme-script"][data-giftme-type="module"]')) {
+    for(const match of script.textContent.matchAll(/\bfrom\s*["']([^"']+)["']/g)) {
+      const href=new URL(match[1],location.href).href;
+      if(modules.has(href))continue;
+      modules.add(href);
+      const link=document.createElement('link');link.rel='modulepreload';link.href=href;link.crossOrigin='anonymous';document.head.append(link);
+    }
+  }
   let booted=false,checking=false;
   let maintenanceHint=0;
   try{maintenanceHint=Number(sessionStorage.getItem('giftme-maintenance-until')||0);}catch(_){}
