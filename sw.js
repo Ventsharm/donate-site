@@ -1,30 +1,5 @@
-const CACHE_NAME = "giftme-cache-v7-native";
-const OFFLINE_URL = "/donate-site/";
-
-self.addEventListener("install", e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(c =>
-      c.addAll([OFFLINE_URL, "/donate-site/maintenance.js"])
-    )
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener("activate", e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k.startsWith("giftme-cache-") && k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
-
-self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
-  const url = new URL(e.request.url);
-  if (url.origin !== self.location.origin || !url.pathname.startsWith("/donate-site/")) return;
-  if (e.request.mode !== "navigate" && url.pathname !== "/donate-site/maintenance.js") return;
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request.mode === "navigate" ? OFFLINE_URL : "/donate-site/maintenance.js"))
-  );
-});
+const CACHE_NAME='giftme-cache-v7-native';
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('giftme-cache-')).map(k=>caches.delete(k)))),self.clients.claim()])));
+// Public campaigns use saved snapshots; API/payment responses are never service-worker cached.
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||e.request.mode!=='navigate')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin||!u.pathname.startsWith('/donate-site/'))return;e.respondWith(fetch(e.request).catch(()=>new Response('GiftMe needs an internet connection to load public campaigns.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}})));});
