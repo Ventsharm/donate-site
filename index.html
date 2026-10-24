@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en" data-giftme-gate="checking">
-<head><style>html[data-giftme-gate] body{visibility:hidden}</style>
+<head><script>
+(()=>{const q=new URLSearchParams(location.search);let legacy=false;try{legacy=q.get('vs_app')==='vs1_5dc403532ca431a3c862b695'||sessionStorage.getItem('vsPaidApp')==='vs1_5dc403532ca431a3c862b695';}catch{}
+const publicVisit=q.has('c')||q.has('slug');if(publicVisit||!legacy){window.giftmePublicRedirect=true;location.replace('/donate-site/'+(publicVisit?'donate.html'+location.search:'get-app.html'));}})();
+</script><style>html[data-giftme-gate] body{visibility:hidden}</style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#7657ea">
 <meta charset="utf-8">

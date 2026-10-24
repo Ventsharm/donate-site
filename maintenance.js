@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  if(window.giftmePublicRedirect)return;
   const endpoint='https://europe-west2-donate-app-ff07c.cloudfunctions.net/giftmeMaintenanceStatus';
   // Fetch static app modules while status is checked, without executing them.
   for(const href of ['https://www.gstatic.com','https://europe-west2-donate-app-ff07c.cloudfunctions.net','https://identitytoolkit.googleapis.com','https://securetoken.googleapis.com']) {

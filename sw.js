@@ -1,4 +1,4 @@
-const CACHE_NAME = "giftme-cache-v6-maintenance";
+const CACHE_NAME = "giftme-cache-v7-native";
 const OFFLINE_URL = "/donate-site/";
 
 self.addEventListener("install", e => {
@@ -22,7 +22,7 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin || !url.pathname.startsWith("/donate-site/")) return;
   if (e.request.mode !== "navigate" && url.pathname !== "/donate-site/maintenance.js") return;
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request.mode === "navigate" ? OFFLINE_URL : "/donate-site/maintenance.js"))
